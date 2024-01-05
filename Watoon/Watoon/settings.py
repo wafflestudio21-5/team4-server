@@ -37,7 +37,22 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    'rest_framework',
+    'rest_auth',
+    #'rest_auth.registration',
+
+    'django.contrib.sites',
+    'user',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    # 'allauth.socialaccount.providers.facebook', # <- 필요한 소셜 로그인 추가
+    
+    'widget_tweaks',
 ]
+
+SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -47,6 +62,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'Watoon.urls'
@@ -86,16 +102,7 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME': 'user.validators.CustomPasswordValidator',
     },
 ]
 
@@ -123,3 +130,63 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Auth settings
+
+AUTH_USER_MODEL = "user.User"
+
+AUTHENTICATION_BACKENDS = [
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+
+    # `allauth` specific authentication methods, such as login by email
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+# Email Settings
+LOGIN_URL = 'account-login'
+ACCOUNT_SIGNUP_REDIRECT_URL = 'account-email-sent'
+ACCOUNT_LOGOUT_ON_GET = True
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "silee11033@gmail.com"
+EMAIL_HOST_PASSWORD = "tzrh vgjj zerv qryl"
+
+
+# REST_AUTH settings
+# REST_USE_JWT = True
+
+REST_AUTH_REGISTER_SERIALIZERS = {
+    'REGISTER_SERIALIZER': 'allauth.account.api.serializers.RegistrationSerializer',
+}
+
+RESTFRAMEWORK = {
+	'DEFAULT_AUTHENTICATION_CLASSES': [
+    	'rest_framework.authentication.SessionAuthenticaiotn',
+        'rest_framework.authentication.BasicAuthenticaiotn',
+        # 'rest_framework.authentication.TokenAuthentication',
+        'allauth.account.auth_backends.AuthenticationBackend',
+    ],
+}
+
+#Allauth settings
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_EMAIL_REQUIRED = True
+
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_UNIQUE_USERNAME = False
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+
+
+ACCOUNT_SESSION_REMEMBER = True
+ACCOUNT_PASSWORD_INPUT_RENDER_VALUE = True
+ACCOUNT_CONFIRM_EMAIL_ON_GET = True
+ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = 'account-email-confirm'
+ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = 'account-email-sent'
+ACCOUNT_EMAIL_SUBJECT_PREFIX = ""
