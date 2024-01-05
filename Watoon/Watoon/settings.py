@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -38,12 +39,16 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
+    'user',
+    
     'rest_framework',
     'rest_auth',
+    'rest_framework_simplejwt',
     #'rest_auth.registration',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
 
     'django.contrib.sites',
-    'user',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -144,7 +149,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # Email Settings
-LOGIN_URL = 'account-login'
+LOGIN_URL = 'account-auth'
 ACCOUNT_SIGNUP_REDIRECT_URL = 'account-email-sent'
 ACCOUNT_LOGOUT_ON_GET = True
 
@@ -155,26 +160,71 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "silee11033@gmail.com"
 EMAIL_HOST_PASSWORD = "tzrh vgjj zerv qryl"
 
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # REST_AUTH settings
-# REST_USE_JWT = True
-
-REST_AUTH_REGISTER_SERIALIZERS = {
-    'REGISTER_SERIALIZER': 'allauth.account.api.serializers.RegistrationSerializer',
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+	'DEFAULT_AUTHENTICATION_CLASSES': [
+        # 'rest_framework.authentication.SessionAuthentication',
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
 }
 
-RESTFRAMEWORK = {
-	'DEFAULT_AUTHENTICATION_CLASSES': [
-    	'rest_framework.authentication.SessionAuthenticaiotn',
-        'rest_framework.authentication.BasicAuthenticaiotn',
-        # 'rest_framework.authentication.TokenAuthentication',
-        'allauth.account.auth_backends.AuthenticationBackend',
-    ],
+
+REST_AUTH = {
+    'REGISTER_SERIALIZER': 'user.serializers.CustomRegisterSerializer',
+
+    "TOKEN_MODEL": None,
+    "USE_JWT": True,
+    'JWT_AUTH_COOKIE' : 'access',
+    "JWT_AUTH_HTTPONLY": False,
+    'JWT_AUTH_REFRESH_COOKIE' : "refresh_token",
+    'JWT_AUTH_COOKIE_USE_CSRF' : True,
+    'SESSION_LOGIN' : False
+}
+
+# JWT settings
+REST_USE_JWT = True
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': False,
+    'UPDATE_LAST_LOGIN': False,
+
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'VERIFYING_KEY': None,
+    'AUDIENCE': None,
+    'ISSUER': None,
+    'JWK_URL': None,
+    'LEEWAY': 0,
+
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+    'USER_AUTHENTICATION_RULE': 'rest_framework_simplejwt.authentication.default_user_authentication_rule',
+
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+    'TOKEN_USER_CLASS': 'rest_framework_simplejwt.models.TokenUser',
+
+    'JTI_CLAIM': 'jti',
+
+    'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
+    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
 
 #Allauth settings
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_REQUIRED = True
@@ -187,6 +237,7 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_PASSWORD_INPUT_RENDER_VALUE = True
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True
-ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = 'account-email-confirm'
-ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = 'account-email-sent'
+ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = 'rest_verify_email'
+ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = 'rest_verify_email'
 ACCOUNT_EMAIL_SUBJECT_PREFIX = ""
+ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1

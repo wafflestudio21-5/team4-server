@@ -16,31 +16,28 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-from allauth.account.views import (LoginView,
-                                   LogoutView,
-                                   SignupView, 
+from rest_framework_simplejwt.views import TokenRefreshView
+from allauth.account.views import ConfirmEmailView, EmailVerificationSentView
+from user.views import MyTokenObtainPairView
 
-                                   ConfirmEmailView,
-                                   EmailVerificationSentView,
-
-                                   PasswordChangeView,
-                                   )
 
 urlpatterns = [
     # admin
     path('admin/', admin.site.urls),
     
-    # auth
-    path('accounts/login/', LoginView.as_view(), name="account-login"),
-    path('accounts/logout/', LogoutView.as_view(), name='account-logout'),
-    path('accounts/signup/', SignupView.as_view(), name='account-signup'),
+    # #JWT
+    # path('token/',  MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    # path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    
+    # path('accounts/emailconfirm/', ConfirmEmailView.as_view(), name="account-email-confirm"),
+    # path('accounts/emailsend/', EmailVerificationSentView.as_view(), name="account-email-sent"),
 
-    path('accounts/emailconfirm/', ConfirmEmailView.as_view(), name="account-email-confirm"),
-    path('accounts/emailsend/', EmailVerificationSentView.as_view(), name="account-email-sent"),
+    # # path('accounts/passwordchange/', PasswordChangeView.as_view(), name="account-password-change"),
 
-    path('accounts/passwordchange/', PasswordChangeView.as_view(), name="account-password-change"),
-
+    path('accounts/', include('dj_rest_auth.urls')),
+    path('accounts/', include('dj_rest_auth.registration.urls')),
     path('accounts/', include('allauth.urls')),
+    path('accounts/', include('user.urls')),
 
     # rest
     path('api-auth/', include('rest_framework.urls')),
