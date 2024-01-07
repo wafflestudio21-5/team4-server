@@ -1,6 +1,6 @@
 
 from rest_framework import serializers
-from .models import UserProfile, Webtoon, Episode, Comment, Tag
+from .models import UserProfile, DayOfWeek, Webtoon, Episode, Comment, Tag
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -8,6 +8,13 @@ class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         field = ['content']
+
+
+class DayOfWeekSerializer(serializers.ModelSerializer):
+    """요일 Serializer"""
+    class Meta:
+        model = DayOfWeek
+        field = ["name"]
 
 
 class WebtoonInfoSerializer(serializers.ModelSerializer):
@@ -20,6 +27,7 @@ class WebtoonInfoSerializer(serializers.ModelSerializer):
 class WebtoonContentSerializer(serializers.ModelSerializer):
     """Webtoon 페이지 안에서의 Serializer"""
     totalRating = serializers.DecimalField(max_digits=3, decimal_places=2, default=0.00)
+    uploadDays = DayOfWeekSerializer(many=True)
     tags = TagSerializer(many=True)
     class Meta:
         model = Webtoon
