@@ -33,11 +33,11 @@ urlpatterns = [
     # path('accounts/emailsend/', EmailVerificationSentView.as_view(), name="account-email-sent"),
 
     # # path('accounts/passwordchange/', PasswordChangeView.as_view(), name="account-password-change"),
-
+    
+    path('accounts/', include('user.urls')),
     path('accounts/', include('dj_rest_auth.urls')),
     path('accounts/', include('dj_rest_auth.registration.urls')),
     path('accounts/', include('allauth.urls')),
-    path('accounts/', include('user.urls')),
 
     # rest
     path('api-auth/', include('rest_framework.urls')),

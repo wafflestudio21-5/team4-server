@@ -1,8 +1,35 @@
 from django.urls import path
-from .views import AuthAPIView, SignupAPIView
+from dj_rest_auth.registration import urls
+
+import Watoon.settings as settings
+
+from dj_rest_auth.views import (
+    LoginView, LogoutView, PasswordChangeView, PasswordResetConfirmView,
+    PasswordResetView,
+)
+from dj_rest_auth import urls
+
+from .views import CustomVerifyEmailView
 
 urlpatterns = [
-    # auth
-    path('auth/', AuthAPIView.as_view(), name="account-auth"),
-    path('registration/', SignupAPIView.as_view(), name='account-signup'),
-]
+    path('password/reset/', PasswordResetView.as_view(), name='rest_password_reset'),
+    path('password/reset/confirm/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+       
+#     path('login/', LoginView.as_view(), name='rest_login'),
+#     path('logout/', LogoutView.as_view(), name='rest_logout'),
+#     path('password/change/', PasswordChangeView.as_view(), name='rest_password_change'),
+    # path('', RegisterView.as_view(), name='rest_register'),
+    path('verify-email/', CustomVerifyEmailView.as_view(), name='rest_verify_email'),
+    # path('resend-email/', ResendEmailVerificationView.as_view(), name="rest_resend_email"),
+
+# ]
+
+# if settings.USE_JWT:
+#     from rest_framework_simplejwt.views import TokenVerifyView
+
+#     from dj_rest_auth.jwt_auth import get_refresh_view
+
+#     urlpatterns += [
+#         path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+#         path('token/refresh/', get_refresh_view().as_view(), name='token_refresh'),
+    ]

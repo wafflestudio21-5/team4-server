@@ -38,21 +38,21 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     
     'user',
     
     'rest_framework',
-    'rest_auth',
+    'rest_framework.authtoken',
     'rest_framework_simplejwt',
     #'rest_auth.registration',
     'dj_rest_auth',
     'dj_rest_auth.registration',
 
-    'django.contrib.sites',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    # 'allauth.socialaccount.providers.facebook', # <- 필요한 소셜 로그인 추가
+    'allauth.socialaccount.providers.google', # <- 필요한 소셜 로그인 추가
     
     'widget_tweaks',
 ]
@@ -168,7 +168,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
 	'DEFAULT_AUTHENTICATION_CLASSES': [
-        # 'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
         'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ],
@@ -176,12 +176,13 @@ REST_FRAMEWORK = {
 
 
 REST_AUTH = {
+    'LOGIN_SERIALIZER': 'user.serializers.CustomLoginSerializer',
     'REGISTER_SERIALIZER': 'user.serializers.CustomRegisterSerializer',
 
-    "TOKEN_MODEL": None,
-    "USE_JWT": True,
+    'TOKEN_MODEL': None,
+    'USE_JWT': True,
     'JWT_AUTH_COOKIE' : 'access',
-    "JWT_AUTH_HTTPONLY": False,
+    'JWT_AUTH_HTTPONLY': False,
     'JWT_AUTH_REFRESH_COOKIE' : "refresh_token",
     'JWT_AUTH_COOKIE_USE_CSRF' : True,
     'SESSION_LOGIN' : False
