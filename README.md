@@ -10,5 +10,5 @@ team4-server에서 상단에 settings 탭 - Secrets and variables - Action에서
 
 이후 .github/workflows/deploy.yml에서 secrets.AWS_ACCESS_KEY_ID_jsh 변수 이름을 secrets에 등록한 변수 이름으로 바꿔주기
 
-
-
++ 
+aws에서 미리 어플리케이션과 환경을 생성한 후, deploy 파일에 application_name과 environment_name을 자신의 것으로 맞춰 기재하기
