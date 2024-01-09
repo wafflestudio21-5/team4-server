@@ -15,3 +15,4 @@ class CustomIsAuthenticated(IsAuthenticated):
         if not bool(request.user and request.user.is_authenticated):
             raise PermissionDenied("You cannot logout when you are not authenticated")
         return True
+        
