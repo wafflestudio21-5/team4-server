@@ -5,9 +5,10 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from dj_rest_auth.registration.serializers import RegisterSerializer
-from dj_rest_auth.serializers import LoginSerializer
+from dj_rest_auth.serializers import LoginSerializer, PasswordResetConfirmSerializer
 
 from allauth.account.adapter import get_adapter
+from allauth.account.utils import url_str_to_user_pk as uid_decoder
 
 from .models import User
 import Watoon.settings as settings
@@ -54,7 +55,40 @@ class CustomRegisterSerializer(RegisterSerializer):
 
         return nickname
     
+class CustomPasswordResetConfirmSerializer(PasswordResetConfirmSerializer):
+    def __init__(self, *args, **kwargs):
+        # Get the request from the context
+        self.request = kwargs.pop('context', {}).get('request')
+        super().__init__(*args, **kwargs)
 
+    def validate(self, attrs):
+        # If request is available, try to get uid and token from the URL
+        if self.request:
+            uidb64 = self.request.parser_context['kwargs'].get('uidb64')
+            token = self.request.parser_context['kwargs'].get('token')
+
+            # Set default values for uid and token if not provided in the URL
+            attrs.setdefault('uid', uidb64)
+            attrs.setdefault('token', token)
+
+            if uidb64:
+                attrs['uid'] = uid_decoder(uidb64)
+            if token:
+                attrs['token'] = token
+
+        # Call the parent validate method
+        return super().validate(attrs)
+
+    def custom_validation(self, attrs):
+        # Your custom validation logic goes here
+        pass
+
+    def save(self):
+        # Your save logic goes here
+        return super().save()
+
+    class Meta:
+        model = User
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
