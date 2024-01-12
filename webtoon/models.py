@@ -24,13 +24,14 @@ class DayOfWeek(models.Model):
 class Webtoon(models.Model):
     """웹툰 모델"""
     title = models.CharField(max_length=50)
-    titleImage = models.ImageField()
+    #titleImage = models.ImageField()
     description = models.CharField(max_length=200)
     isFinished = models.BooleanField(default=False)
 
     uploadDays = models.ManyToManyField(DayOfWeek, blank=False, related_name='webtoons')    # 업로드 요일 (복수 선택가능)
-    author = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='uploadedWebtoons')
-    subscribers = models.ManyToManyField(UserProfile, blank=True, related_name='subscribingWebtoons')   # 구독자
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='uploadedWebtoons')
+    subscribers = models.ManyToManyField(User, blank=True, related_name='subscribingWebtoons')   # 구독자
+    releasedDate = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return self.title
@@ -40,14 +41,14 @@ class Episode(models.Model):
     """회차 모델"""
     title = models.CharField(max_length=50)
     episodeNumber = models.IntegerField()                                # 회차 번호
-    thumbnail = models.ImageField()
+    #thumbnail = models.ImageField()
     content = models.ImageField()
     rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
-    ratedBy = models.ManyToManyField(UserProfile, blank=True, related_name='ratedEpisodes')         # 별점을 매긴 사람 목록
+    ratedBy = models.ManyToManyField(User, blank=True, related_name='ratedEpisodes')         # 별점을 매긴 사람 목록
     releasedDate = models.DateField(auto_now_add=True)
 
     webtoon = models.ForeignKey(Webtoon, on_delete=models.CASCADE, related_name='episodes')
-    likedBy = models.ManyToManyField(UserProfile, blank=True, related_name='likedEpisodes')         # 좋아요 남긴 사람 목록
+    likedBy = models.ManyToManyField(User, blank=True, related_name='likedEpisodes')         # 좋아요 남긴 사람 목록
 
     comments = GenericRelation('Comment', related_query_name='episode')
 
@@ -64,7 +65,7 @@ class Comment(models.Model):
     dtCreated = models.DateTimeField(auto_now_add=True)
     dtUpdated = models.DateTimeField(auto_now=True)
 
-    createdBy = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='comments')
+    createdBy = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
 
     # generic relationship ( 댓글을 회차에 달거나, 댓글에 대댓글로 달 수 있으므로 )
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
@@ -74,8 +75,8 @@ class Comment(models.Model):
     comments = GenericRelation('Comment')                     # 본 댓글에 달린 대댓글들
 
     # 좋아요, 싫어요
-    likedBy = models.ManyToManyField(UserProfile, blank=True, related_name='likedComments')
-    dislikedBy = models.ManyToManyField(UserProfile, blank=True, related_name='dislikedComments')
+    likedBy = models.ManyToManyField(User, blank=True, related_name='likedComments')
+    dislikedBy = models.ManyToManyField(User, blank=True, related_name='dislikedComments')
 
     def __str__(self):
         return self.content[:30]
