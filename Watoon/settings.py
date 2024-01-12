@@ -42,8 +42,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-    
+
     'user',
+    'webtoon',
     
     'rest_framework',
     'rest_framework.authtoken',

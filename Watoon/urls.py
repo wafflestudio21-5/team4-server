@@ -22,6 +22,9 @@ from user.views import MyTokenObtainPairView
 
 
 urlpatterns = [
+    # webtoon
+    path('', include('webtoon.urls')),
+    
     # admin
     path('admin/', admin.site.urls),
     
