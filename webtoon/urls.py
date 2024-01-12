@@ -2,7 +2,7 @@ from django.urls import path
 
 from .views import (WebtoonAPIView, 
                     EpisodeAPIView, 
-                    CommentAPIView
+                    CommentAPIView, 
                     WebtoonListAPIView,
                     WebtoonListFinishedAPIView,
                     WebtoonListRecentAPIView,

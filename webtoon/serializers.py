@@ -19,7 +19,10 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ['content']
 
     def run_validation(self, data):
-        value = Tag.objects.get(pk=data['content'])
+        try:
+            value = Tag.objects.get(pk=data['content'])
+        except:
+            value = Tag.objects.create(pk=data['content'])
         return value
 
 
@@ -52,7 +55,7 @@ class WebtoonContentSerializer(serializers.ModelSerializer):
         #fields = ['id', 'title', 'titleImage', 'description', 'uploadDays', 'author', 'totalRating', 'tags']
         read_only_fields = ['author', 'releasedDate']
        
-     def create(self, validated_data):
+    def create(self, validated_data):
             tags = validated_data.pop('tags')
             uploadDays = validated_data.pop('uploadDays')
             webtoon = Webtoon.objects.create(**validated_data)
@@ -105,6 +108,7 @@ class EpisodeInfoSerializer(serializers.ModelSerializer):
         #fields = ['id', 'title', 'episodeNumber', 'thumbnail', 'rating', 'releasedDate']
         fields = ['id', 'title', 'episodeNumber', 'rating', 'releasedDate']
         read_only_fields = ['rating', 'releasedDate']
+
 
 class EpisodeContentSerializer(serializers.ModelSerializer):
     """Episode 페이지 안에서의 Serializer"""

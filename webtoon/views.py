@@ -1,26 +1,24 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import status
-from rest_framework.generics import CreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
 from rest_framework import generics 
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 
 
 from .models import Webtoon, Comment, DayOfWeek, Episode, Tag, UserProfile 
 from .serializers import (WebtoonContentSerializer,
                           WebtoonInfoSerializer,
                           WebtoonContentSerializer,
-                          TagSerializer,
                           EpisodeInfoSerializer,
                           EpisodeContentSerializer,
                           CommentInfoSerializer,
                           CommentContentSerializer,
-                          SubscriberUserProfileSerializer,)
+                          )
 
 
 
@@ -31,12 +29,24 @@ class WebtoonAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Webtoon.objects.all()
     serializer_class  = WebtoonContentSerializer
 
-    # Webtoon이 delete 될 때, 만약 대응되는 tag가 하나도 남지 않게 된다면 tag를 delete. 
-    def delete(self, request, pk):
+    # Webtoon이 update 또는 delete 될 때, 만약 대응되는 tag가 하나도 남지 않게 된다면 tag를 delete.
+
+    def checkTag(self):
         webtoon = self.get_object()
         for tag in webtoon.tags.all():
             if tag.webtoons.count() == 1:
                 tag.delete()
+
+    def put(self, request, pk):
+        self.checkTag()
+        return super().put(request, pk)
+
+    def patch(self, request, pk):
+        self.checkTag()
+        return super().patch(request, pk)
+
+    def delete(self, request, pk):
+        self.checkTag()
         return super().delete(request, pk)
 
 
@@ -60,19 +70,19 @@ class CommentAPIView(RetrieveUpdateDestroyAPIView):
             if key not in self.allow_data_on_creating:
                 return Response({'message' : 'To create comments, only these data should be entered : ' + str(self.allow_data_on_creating)}, status=status.HTTP_400_BAD_REQUEST)
         instance = Comment.objects.create(createdBy=request.user, commentOn=self.get_object())
-        request.data['likedBy'] = []
-        request.data['dislikedBy'] = []
+        if 'likedBy' not in request.data:
+            request.data['likedBy'] = []
+        if 'dislikedBy' not in request.data:
+            request.data['dislikedBy'] = []
         serializer = CommentContentSerializer(data=request.data, instance=instance)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserAPIView(RetrieveUpdateDestroyAPIView):
     queryset = UserProfile.objects.all()
-
-
 
 
 class WebtoonListAPIView(APIView):
@@ -91,9 +101,11 @@ class WebtoonListAPIView(APIView):
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
+
 class WebtoonListFinishedAPIView(generics.ListAPIView):
     queryset = Webtoon.objects.filter(isFinished=True)
     serializer_class = WebtoonInfoSerializer
+
 
 class WebtoonListRecentAPIView(generics.ListAPIView):
     serializer_class = WebtoonInfoSerializer
@@ -103,6 +115,7 @@ class WebtoonListRecentAPIView(generics.ListAPIView):
         today = date.today()
         return Webtoon.objects.filter(releasedDate__gte=today - timedelta(21))
 
+
 class DayWebtoonListAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = WebtoonInfoSerializer
@@ -110,6 +123,7 @@ class DayWebtoonListAPIView(generics.ListAPIView):
     def get_queryset(self):
         day = get_object_or_404(DayOfWeek, name=self.kwargs.get('day'))
         return Webtoon.objects.filter(uploadDays=day)
+
 
 class EpisodeListAPIView(APIView):
     def getWebtoon(self, pk):
@@ -142,11 +156,13 @@ class TagWebtoonAPIView(APIView):
     
 
 class EpisodeCommentAPIView(APIView):
+    allow_data_on_creating = ['content']
+
     def getEpisode(self, pk):
         return Episode.objects.get(pk = pk)
     
     def getContentType(self):
-        return ContentType.objects.get(model="comment")
+        return ContentType.objects.get(model="episode")
 
     def get(self, request, pk):
         episode = self.getEpisode(pk)
@@ -155,16 +171,17 @@ class EpisodeCommentAPIView(APIView):
         return Response(serializer.data)
     
     def post(self, request, pk):
-        episode = self.getEpisode(pk)
+        for key in request.data:
+            if key not in self.allow_data_on_creating:
+                return Response({'message' : 'To create comments, only these data should be entered : ' + str(self.allow_data_on_creating)}, status=status.HTTP_400_BAD_REQUEST)
+        instance = Comment.objects.create(createdBy=request.user, commentOn=self.getEpisode(pk))
         if 'likedBy' not in request.data:
             request.data['likedBy'] = []
         if 'dislikedBy' not in request.data:
             request.data['dislikedBy'] = []
-
-        serializer = CommentContentSerializer(data = request.data)
+        serializer = CommentContentSerializer(data=request.data, instance=instance)
         if serializer.is_valid(raise_exception=True):
-            comment = serializer.save(createdBy = request.user, 
-                                      content_type = self.getContentType(),
-                                      object_id = pk)
+            serializer.save()
             return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
