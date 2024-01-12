@@ -181,7 +181,7 @@ REST_FRAMEWORK = {
 REST_AUTH = {
     'LOGIN_SERIALIZER': 'user.serializers.CustomLoginSerializer',
     'REGISTER_SERIALIZER': 'user.serializers.CustomRegisterSerializer',
-
+    # 'PASSWORD_RESET_CONFIRM_SERIALIZER': 'user.serializers.CustomPasswordResetConfirmSerializer',
     'TOKEN_MODEL': None,
     'USE_JWT': True,
     'JWT_AUTH_COOKIE' : 'access',
