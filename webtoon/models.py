@@ -7,8 +7,9 @@ from user.models import User
 
 # Create your models here.
 class UserProfile(models.Model):
+    name = models.CharField(blank=False, max_length=50, unique=True)
     isAuthor = models.BooleanField(default=False)
-
+    
     subscribers = models.ManyToManyField('self', symmetrical=False, blank=True, related_name='subscribingAuthors') # 구독자
 
 
@@ -27,14 +28,25 @@ class Webtoon(models.Model):
     #titleImage = models.ImageField()
     description = models.CharField(max_length=200)
     isFinished = models.BooleanField(default=False)
+    totalRating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
 
     uploadDays = models.ManyToManyField(DayOfWeek, blank=False, related_name='webtoons')    # 업로드 요일 (복수 선택가능)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='uploadedWebtoons')
     subscribers = models.ManyToManyField(User, blank=True, related_name='subscribingWebtoons')   # 구독자
     releasedDate = models.DateField(auto_now_add=True)
 
+
     def __str__(self):
         return self.title
+
+    def update_rating(self):
+        rating = 0.0
+        for episode in self.episodes.all():
+            rating += float(episode.rating)
+        if self.episodes.count() != 0:
+            rating /= self.episodes.count()
+        self.totalRating = rating
+        self.save()
 
 
 class Episode(models.Model):
@@ -42,7 +54,8 @@ class Episode(models.Model):
     title = models.CharField(max_length=50)
     episodeNumber = models.IntegerField()                                # 회차 번호
     #thumbnail = models.ImageField()
-    content = models.ImageField()
+    #content = models.ImageField()
+
     rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
     ratedBy = models.ManyToManyField(User, blank=True, related_name='ratedEpisodes')         # 별점을 매긴 사람 목록
     releasedDate = models.DateField(auto_now_add=True)
@@ -57,6 +70,8 @@ class Episode(models.Model):
 
     def __str__(self):
         return str(self.episodeNumber) + '. ' + self.title
+
+        
 
 
 class Comment(models.Model):

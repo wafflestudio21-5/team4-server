@@ -1,7 +1,14 @@
-
+from user.models import User
 from rest_framework import serializers
-from .models import UserProfile, DayOfWeek, Webtoon, Episode, Comment, Tag
+
+from .models import DayOfWeek, Webtoon, Episode, Comment, Tag
 from user.serializers import UserSerializer
+
+
+# ///////////////////////////////////////////////////////////////////////////////
+# Serializer 작업 때 Image 관련 요소 모두 주석처리 하여 추후 Merge 때 확인 필요
+# ///////////////////////////////////////////////////////////////////////////////
+
 
 
 
@@ -10,19 +17,18 @@ class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ['content']
-        extra_kwargs = {
-            'content' : {'validators': []},
-        }
+
+    def run_validation(self, data):
+        value = Tag.objects.get(pk=data['content'])
+        return value
 
 
 class DayOfWeekSerializer(serializers.ModelSerializer):
     """요일 Serializer"""
     class Meta:
         model = DayOfWeek
-        fields = ["name"]
-        extra_kwargs = {
-            'name' : {'validators': []},
-        }
+        fields = ['name']
+
 
 
 class WebtoonInfoSerializer(serializers.ModelSerializer):
@@ -37,18 +43,16 @@ class WebtoonInfoSerializer(serializers.ModelSerializer):
 
 class WebtoonContentSerializer(serializers.ModelSerializer):
     """Webtoon 페이지 안에서의 Serializer"""
-    #totalRating = serializers.DecimalField(max_digits=3, decimal_places=2, default=0.00)
     uploadDays = DayOfWeekSerializer(many=True)
-    tags = TagSerializer(many=True)
+    tags = TagSerializer(many=True, required=False)
     author = UserSerializer(read_only = True)
     class Meta:
         model = Webtoon
-        fields = ['id', 'title', 'description', 'uploadDays', 'author', 'tags']
-        read_only_fields = ['author', 'releasedDate']
-
+        fields = ['id', 'title', 'description', 'uploadDays', 'author', 'totalRating', 'tags']
         #fields = ['id', 'title', 'titleImage', 'description', 'uploadDays', 'author', 'totalRating', 'tags']
-    
-    def create(self, validated_data):
+        read_only_fields = ['author', 'releasedDate']
+       
+     def create(self, validated_data):
             tags = validated_data.pop('tags')
             uploadDays = validated_data.pop('uploadDays')
             webtoon = Webtoon.objects.create(**validated_data)
@@ -68,9 +72,31 @@ class WebtoonContentSerializer(serializers.ModelSerializer):
                     uploadDay = DayOfWeek.objects.create(name=day_data['name'])
                     uploadDay.save()
                 webtoon.uploadDays.add(uploadDay)
-                
             return webtoon
 
+    def update(self, instance, validated_data):
+        for key in validated_data:
+            if key in ['uploadDays', 'tags']:
+                continue
+            setattr(instance, key, validated_data[key])
+        print(validated_data)
+        uploadDays = validated_data.get('uploadDays', instance.uploadDays)
+        if hasattr(uploadDays, '__iter__'):
+            for uploadDay in instance.uploadDays.all():
+                instance.uploadDays.remove(uploadDay)
+            for uploadDay in uploadDays:
+                instance.uploadDays.add(DayOfWeek.objects.get(name=uploadDay['name']))
+
+        tags = validated_data.get('tags', instance.tags)
+        if hasattr(tags, '__iter__'):
+            for tag in instance.tags.all():
+                instance.tags.remove(tag)
+            for tag in tags:
+                instance.tags.add(tag)
+        instance.update_rating()
+        instance.save()
+        return instance
+    
 
 class EpisodeInfoSerializer(serializers.ModelSerializer):
     """Webtoon 페이지에서 보여지는 Episode의 Serializer"""
@@ -83,57 +109,73 @@ class EpisodeInfoSerializer(serializers.ModelSerializer):
 class EpisodeContentSerializer(serializers.ModelSerializer):
     """Episode 페이지 안에서의 Serializer"""
     webtoon = WebtoonInfoSerializer(read_only=True)
-
     class Meta:
         model = Episode
         fields = ['id', 'title', 'episodeNumber', 'rating', 'releasedDate', 'webtoon']
         #fields = ['id', 'title', 'episodeNumber', 'thumbnail', 'content', 'rating', 'releasedDate']
         read_only_fields = ['rating', 'releasedDate']
-
     
-class UserProfileInfoSerializer(serializers.ModelSerializer):
-    """다른 페이지에서 보이는 유저 Serializer"""
-    class Meta:
-        model = UserProfile
-        fields = ['id']
+    def update(self, instance, validated_data):
+        for key in validated_data:
+            if key in ['webtoon']:
+                continue
+            setattr(instance, key, validated_data[key])
+        webtoon = validated_data.get('webtoon', instance.webtoon)
+        if not isinstance(webtoon, Webtoon):
+            instance.webtoon = Webtoon.objects.get(title=webtoon['title'])
+        instance.save()
+        instance.webtoon.update_rating()
+        return instance
+    
 
-
-class SubscriberUserProfileSerializer(serializers.ModelSerializer):
+class SubscriberUserSerializer(serializers.ModelSerializer):
     """Subscriber를 보여주기 위한 Nested Serializer 용도로 사용"""
     class Meta:
-        model = UserProfile
-        fields = ['id']
+        model = User
+        fields = ['id', 'nickname']
 
-class UserProfileContentSerializer(serializers.ModelSerializer):
+
+class UserInfoSerializer(serializers.ModelSerializer):
+    """다른 페이지에서 보이는 유저 Serializer"""
+    class Meta:
+        model = User
+        fields = ['id', 'nickname']
+    
+    def run_validation(self, data):
+        value = User.objects.get(nickname=data['nickname'])
+        return value
+
+
+class UserContentSerializer(serializers.ModelSerializer):
     """유저 Serializer"""
     webtoons = WebtoonInfoSerializer(many=True)
     subscribingWebtoons = WebtoonInfoSerializer(many=True)
-    subscribers = SubscriberUserProfileSerializer(many=True)
+    subscribers = SubscriberUserSerializer(many=True)
     class Meta:
-        model = UserProfile
-        fields = ['id', 'isAuther', 'webtoons', 'subscribingWebtoons', 'subscribers']
+        model = User
+        fields = ['id', 'nickname', 'isAuther', 'webtoons', 'subscribingWebtoons', 'subscribers']
+
+
 
 
 class CommentInfoSerializer(serializers.ModelSerializer):
-    """대댓글을 보여주기 위한 Nested Serializer 용도로 사용"""
-    #likedNumber = serializers.IntegerField()
-    #dislikedNumber = serializers.IntegerField()
-
+    """Webtoon 페이지에서 보여지는 Comment의 Serializer"""
     class Meta:
         model = Comment
-        fields = ['id', 'content', 'dtCreated', 'dtUpdated', 'createdBy',]# 'likedNumber', 'dislikedNumber']
-        read_only_fields = ['dtCreated', 'dtUpdated', 'createdBy',]# 'likedNumber', 'dislikedNumber']
+        fields = ['id', 'content', 'dtCreated', 'dtUpdated', 'createdBy']
+        read_only_fields = ['dtCreated', 'dtUpdated', 'createdBy']
 
 
 class CommentContentSerializer(serializers.ModelSerializer):
-    """댓글 Serializer"""
-    comments = CommentInfoSerializer(many=True, read_only = True)
-    likedBy = UserProfileInfoSerializer(many=True)
-    dislikedBy = UserProfileInfoSerializer(many=True)
+    """댓글 페이지 안에서의 Serializer"""
+    comments = CommentInfoSerializer(many=True, read_only=True)
+    likedBy = UserInfoSerializer(many=True)
+    dislikedBy = UserInfoSerializer(many=True)
     class Meta:
         model = Comment
         fields = ['id', 'content', 'dtCreated', 'dtUpdated', 'createdBy', 'comments', 'likedBy', 'dislikedBy']
         read_only_fields = ['dtCreated', 'dtUpdated', 'createdBy', 'comments']
+    
 
     def create(self, validated_data):
         instance = Comment()
@@ -141,19 +183,47 @@ class CommentContentSerializer(serializers.ModelSerializer):
             if key in ['comments', 'likedBy', 'dislikedBy']:
                 continue
             setattr(instance, key, validated_data[key])
-        instance.save()
         likedBy = validated_data.get('likedBy', instance.likedBy)
         if hasattr(likedBy, '__iter__'):
             for user in instance.likedBy.all():
                 instance.likedBy.remove(user)
             for user in likedBy:
-                instance.likedBy.add(UserProfile.objects.get(name=user.name))
+                print(user)
+                instance.likedBy.add(User.objects.get(nickname=user.nickname))
 
         dislikedBy = validated_data.get('dislikedBy', instance.dislikedBy)
         if hasattr(dislikedBy, '__iter__'):
             for user in instance.dislikedBy.all():
                 instance.dislikedBy.remove(user)
             for user in dislikedBy:
-                instance.dislikedBy.add(UserProfile.objects.get(name=user.name))  
+                print(user)
+                instance.dislikedBy.add(User.objects.get(nickname=user.nickname))  
         instance.save()
         return instance
+
+
+    def update(self, instance, validated_data):
+        for key in validated_data:
+            if key in ['comments', 'likedBy', 'dislikedBy']:
+                continue
+            setattr(instance, key, validated_data[key])
+        likedBy = validated_data.get('likedBy', instance.likedBy)
+        if hasattr(likedBy, '__iter__'):
+            for user in instance.likedBy.all():
+                instance.likedBy.remove(user)
+            for user in likedBy:
+                instance.likedBy.add(User.objects.get(nickname=user.nickname))
+
+
+        dislikedBy = validated_data.get('dislikedBy', instance.dislikedBy)
+        if hasattr(dislikedBy, '__iter__'):
+            for user in instance.dislikedBy.all():
+                instance.dislikedBy.remove(user)
+            for user in dislikedBy:
+                instance.dislikedBy.add(User.objects.get(nickname=user.nickname))  
+        instance.save()
+        return instance
+
+    def validate(self, data):
+        return data
+
