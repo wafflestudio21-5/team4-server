@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     
     'user',
-    
+    'drf_yasg',
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
@@ -152,7 +152,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # Email Settings
-LOGIN_URL = 'account-auth'
+LOGIN_URL = 'rest_login'
 ACCOUNT_SIGNUP_REDIRECT_URL = 'account-email-sent'
 ACCOUNT_LOGOUT_ON_GET = True
 
