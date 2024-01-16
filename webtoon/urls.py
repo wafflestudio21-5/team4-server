@@ -10,6 +10,8 @@ from .views import (WebtoonAPIView,
                     EpisodeListAPIView,
                     TagWebtoonAPIView,
                     EpisodeCommentAPIView,
+                    # new views
+                    SubCommentListAPIView,
                    )
 
 urlpatterns = [
@@ -21,7 +23,10 @@ urlpatterns = [
     path('api/webtoon/<int:pk>/episode', EpisodeListAPIView.as_view()), 
     path('api/episode/<int:pk>', EpisodeAPIView.as_view()), 
     path('api/episode/<int:pk>/comment', EpisodeCommentAPIView.as_view()),
-    path('api/comment/<int:pk>', CommentAPIView.as_view()), 
-    path('api/tag/<str:content>', TagWebtoonAPIView.as_view()), 
+    path('api/comment/<int:pk>', CommentAPIView.as_view()),
+    path('api/tag/<str:content>', TagWebtoonAPIView.as_view()),
+
+    # new endpoints
+    path('api/comment/<int:pk>/comment', SubCommentListAPIView.as_view()),
 
 ]

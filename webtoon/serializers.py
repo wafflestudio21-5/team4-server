@@ -172,72 +172,85 @@ class UserContentSerializer(serializers.ModelSerializer):
 
 
 
-class CommentInfoSerializer(serializers.ModelSerializer):
-    """Webtoon 페이지에서 보여지는 Comment의 Serializer"""
-    class Meta:
-        model = Comment
-        fields = ['id', 'content', 'dtCreated', 'dtUpdated', 'createdBy']
-        read_only_fields = ['dtCreated', 'dtUpdated', 'createdBy']
+# class CommentInfoSerializer(serializers.ModelSerializer):
+#     """Webtoon 페이지에서 보여지는 Comment의 Serializer"""
+#     class Meta:
+#         model = Comment
+#         fields = ['id', 'content', 'dtCreated', 'dtUpdated', 'createdBy']
+#         read_only_fields = ['dtCreated', 'dtUpdated', 'createdBy']
 
 
 class CommentContentSerializer(serializers.ModelSerializer):
     """댓글 페이지 안에서의 Serializer"""
-    comments = CommentInfoSerializer(many=True, read_only=True)
-    likedBy = UserInfoSerializer(many=True)
-    dislikedBy = UserInfoSerializer(many=True)
+    # comments = CommentInfoSerializer(many=True, read_only=True)
+    subComments = serializers.SerializerMethodField(method_name='getComments', read_only=True)
+    # likedBy = UserInfoSerializer(many=True)
+    likedBy = serializers.SerializerMethodField(method_name='getLikedBy', read_only=True)
+    # dislikedBy = UserInfoSerializer(many=True)
+    dislikedBy = serializers.SerializerMethodField(method_name='getDislikedBy', read_only=True)
+    createdBy = UserInfoSerializer(read_only=True)
     class Meta:
         model = Comment
-        fields = ['id', 'content', 'dtCreated', 'dtUpdated', 'createdBy', 'comments', 'likedBy', 'dislikedBy']
-        read_only_fields = ['dtCreated', 'dtUpdated', 'createdBy', 'comments']
+        fields = ['id', 'content', 'dtCreated', 'dtUpdated', 'createdBy', 'subComments', 'likedBy', 'dislikedBy']
+        read_only_fields = ['dtCreated', 'dtUpdated', 'createdBy', 'subComments', 'likedBy', 'dislikedBy']
+
+    def getComments(self, obj):
+        return obj.comments.count()
+
+    def getLikedBy(self, obj):
+        return obj.likedBy.count()
+
+    def getDislikedBy(self, obj):
+        return obj.dislikedBy.count()
     
 
-    def create(self, validated_data):
-        instance = Comment()
-        for key in validated_data:
-            if key in ['comments', 'likedBy', 'dislikedBy']:
-                continue
-            setattr(instance, key, validated_data[key])
-        likedBy = validated_data.get('likedBy', instance.likedBy)
-        if hasattr(likedBy, '__iter__'):
-            for user in instance.likedBy.all():
-                instance.likedBy.remove(user)
-            for user in likedBy:
-                print(user)
-                instance.likedBy.add(User.objects.get(nickname=user.nickname))
-
-        dislikedBy = validated_data.get('dislikedBy', instance.dislikedBy)
-        if hasattr(dislikedBy, '__iter__'):
-            for user in instance.dislikedBy.all():
-                instance.dislikedBy.remove(user)
-            for user in dislikedBy:
-                print(user)
-                instance.dislikedBy.add(User.objects.get(nickname=user.nickname))
-        instance.save()
-        return instance
-
-
-    def update(self, instance, validated_data):
-        for key in validated_data:
-            if key in ['comments', 'likedBy', 'dislikedBy']:
-                continue
-            setattr(instance, key, validated_data[key])
-        likedBy = validated_data.get('likedBy', instance.likedBy)
-        if hasattr(likedBy, '__iter__'):
-            for user in instance.likedBy.all():
-                instance.likedBy.remove(user)
-            for user in likedBy:
-                instance.likedBy.add(User.objects.get(nickname=user.nickname))
+    # def create(self, validated_data):
+    #     instance = Comment()
+    #     for key in validated_data:
+    #         if key in ['comments', 'likedBy', 'dislikedBy']:
+    #             continue
+    #         setattr(instance, key, validated_data[key])
+    #     likedBy = validated_data.get('likedBy', instance.likedBy)
+    #     if hasattr(likedBy, '__iter__'):
+    #         for user in instance.likedBy.all():
+    #             instance.likedBy.remove(user)
+    #         for user in likedBy:
+    #             print(user)
+    #             instance.likedBy.add(User.objects.get(nickname=user.nickname))
+    #
+    #     dislikedBy = validated_data.get('dislikedBy', instance.dislikedBy)
+    #     if hasattr(dislikedBy, '__iter__'):
+    #         for user in instance.dislikedBy.all():
+    #             instance.dislikedBy.remove(user)
+    #         for user in dislikedBy:
+    #             print(user)
+    #             instance.dislikedBy.add(User.objects.get(nickname=user.nickname))
+    #     instance.save()
+    #     return instance
 
 
-        dislikedBy = validated_data.get('dislikedBy', instance.dislikedBy)
-        if hasattr(dislikedBy, '__iter__'):
-            for user in instance.dislikedBy.all():
-                instance.dislikedBy.remove(user)
-            for user in dislikedBy:
-                instance.dislikedBy.add(User.objects.get(nickname=user.nickname))  
-        instance.save()
-        return instance
-
-    def validate(self, data):
-        return data
+    # def update(self, instance, validated_data):
+    #     for key in validated_data:
+    #         if key in ['comments', 'likedBy', 'dislikedBy']:
+    #             continue
+    #         setattr(instance, key, validated_data[key])
+    #     likedBy = validated_data.get('likedBy', instance.likedBy)
+    #     if hasattr(likedBy, '__iter__'):
+    #         for user in instance.likedBy.all():
+    #             instance.likedBy.remove(user)
+    #         for user in likedBy:
+    #             instance.likedBy.add(User.objects.get(nickname=user.nickname))
+    #
+    #
+    #     dislikedBy = validated_data.get('dislikedBy', instance.dislikedBy)
+    #     if hasattr(dislikedBy, '__iter__'):
+    #         for user in instance.dislikedBy.all():
+    #             instance.dislikedBy.remove(user)
+    #         for user in dislikedBy:
+    #             instance.dislikedBy.add(User.objects.get(nickname=user.nickname))
+    #     instance.save()
+    #     return instance
+    #
+    # def validate(self, data):
+    #     return data
 
