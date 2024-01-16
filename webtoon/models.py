@@ -3,6 +3,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 
 from user.models import User
+from .validators import isDayName
 
 
 # Create your models here.
@@ -16,7 +17,7 @@ class UserProfile(models.Model):
 class DayOfWeek(models.Model):
     """요일 모델 : 요일별 웹툰 분류를 위해 사용"""
     # 요일 이름 : Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday
-    name = models.CharField(max_length=10)
+    name = models.CharField(max_length=10, validators=[isDayName])
 
     def __str__(self):
         return self.name
