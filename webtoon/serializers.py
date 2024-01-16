@@ -1,3 +1,5 @@
+from django.http import Http404
+
 from user.models import User
 from rest_framework import serializers
 
@@ -49,40 +51,44 @@ class WebtoonContentSerializer(serializers.ModelSerializer):
     uploadDays = DayOfWeekSerializer(many=True)
     tags = TagSerializer(many=True, required=False)
     author = UserSerializer(read_only = True)
+    subscribeCount = serializers.SerializerMethodField(method_name='getSubscribeCount')
     class Meta:
         model = Webtoon
-        fields = ['id', 'title', 'description', 'uploadDays', 'author', 'totalRating', 'tags']
+        fields = ['id', 'title', 'description', 'uploadDays', 'author', 'totalRating', 'tags', 'subscribeCount']
         #fields = ['id', 'title', 'titleImage', 'description', 'uploadDays', 'author', 'totalRating', 'tags']
-        read_only_fields = ['author', 'releasedDate']
+        read_only_fields = ['author', 'releasedDate', 'subscribeCount', 'totalRating']
        
     def create(self, validated_data):
-            tags = validated_data.pop('tags')
-            uploadDays = validated_data.pop('uploadDays')
-            webtoon = Webtoon.objects.create(**validated_data)
-            
-            for tag_data in tags: 
-                try :
-                    tag = Tag.objects.get(content=tag_data['content'])
-                except : 
-                    tag = Tag.objects.create(content=tag_data['content'])
-                    tag.save()
-                tag.webtoons.add(webtoon)
-            
-            for day_data in uploadDays: 
-                try :
-                    uploadDay = DayOfWeek.objects.get(name=day_data['name'])
-                except : 
-                    uploadDay = DayOfWeek.objects.create(name=day_data['name'])
-                    uploadDay.save()
-                webtoon.uploadDays.add(uploadDay)
-            return webtoon
+        tags = validated_data.pop('tags')
+        uploadDays = validated_data.pop('uploadDays')
+        webtoon = Webtoon.objects.create(**validated_data)
+
+        for tag_data in tags:
+            try :
+                tag = Tag.objects.get(content=tag_data['content'])
+            except :
+                tag = Tag.objects.create(content=tag_data['content'])
+                tag.save()
+            tag.webtoons.add(webtoon)
+
+        for day_data in uploadDays:
+            try :
+                uploadDay = DayOfWeek.objects.get(name=day_data['name'])
+            except :
+                uploadDay = DayOfWeek.objects.create(name=day_data['name'])
+                uploadDay.save()
+            webtoon.uploadDays.add(uploadDay)
+        return webtoon
 
     def update(self, instance, validated_data):
+        # uploadDays, tags를 제외한 필드는 그냥 값 바꾸기
         for key in validated_data:
             if key in ['uploadDays', 'tags']:
                 continue
             setattr(instance, key, validated_data[key])
         print(validated_data)
+
+        # uploadDays 수정
         uploadDays = validated_data.get('uploadDays', instance.uploadDays)
         if hasattr(uploadDays, '__iter__'):
             for uploadDay in instance.uploadDays.all():
@@ -90,6 +96,7 @@ class WebtoonContentSerializer(serializers.ModelSerializer):
             for uploadDay in uploadDays:
                 instance.uploadDays.add(DayOfWeek.objects.get(name=uploadDay['name']))
 
+        # tags 수정
         tags = validated_data.get('tags', instance.tags)
         if hasattr(tags, '__iter__'):
             for tag in instance.tags.all():
@@ -99,6 +106,9 @@ class WebtoonContentSerializer(serializers.ModelSerializer):
         instance.update_rating()
         instance.save()
         return instance
+
+    def getSubscribeCount(self, obj):
+        return obj.subscribers.count()
     
 
 class EpisodeInfoSerializer(serializers.ModelSerializer):
@@ -201,7 +211,7 @@ class CommentContentSerializer(serializers.ModelSerializer):
                 instance.dislikedBy.remove(user)
             for user in dislikedBy:
                 print(user)
-                instance.dislikedBy.add(User.objects.get(nickname=user.nickname))  
+                instance.dislikedBy.add(User.objects.get(nickname=user.nickname))
         instance.save()
         return instance
 
