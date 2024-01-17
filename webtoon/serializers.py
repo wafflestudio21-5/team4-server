@@ -55,12 +55,13 @@ class WebtoonContentSerializer(serializers.ModelSerializer):
     uploadDays = DayOfWeekSerializer(many=True)
     tags = TagSerializer(many=True, required=False)
     author = UserSerializer(read_only = True)
-    subscribeCount = serializers.SerializerMethodField(method_name='getSubscribeCount')
+    subscribeCount = serializers.SerializerMethodField(method_name='getSubscribeCount', read_only=True)
+    episodeCount = serializers.SerializerMethodField(method_name='getEpisodeCount', read_only=True)
     class Meta:
         model = Webtoon
-        fields = ['id', 'title', 'description', 'uploadDays', 'author', 'totalRating', 'tags', 'subscribeCount']
+        fields = ['id', 'title', 'description', 'uploadDays', 'author', 'totalRating', 'episodeCount', 'isFinished', 'tags', 'subscribeCount']
         #fields = ['id', 'title', 'titleImage', 'description', 'uploadDays', 'author', 'totalRating', 'tags']
-        read_only_fields = ['author', 'releasedDate', 'subscribeCount', 'totalRating']
+        read_only_fields = ['author', 'releasedDate', 'subscribeCount', 'totalRating', 'episodeCount']
        
     def create(self, validated_data):
         tags = validated_data.pop('tags')
@@ -118,6 +119,9 @@ class WebtoonContentSerializer(serializers.ModelSerializer):
 
     def getSubscribeCount(self, obj):
         return obj.subscribers.count()
+
+    def getEpisodeCount(self, obj):
+        return obj.episodes.count()
     
 
 class EpisodeInfoSerializer(serializers.ModelSerializer):
