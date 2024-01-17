@@ -10,14 +10,26 @@ class TagInline(admin.StackedInline):
     verbose_name_plural = 'Tags'
 
 
+class WebtoonInline(admin.StackedInline):
+    model = Webtoon.uploadDays.through
+    verbose_name = 'Webtoon'
+    verbose_name_plural = 'Webtoons'
+
+
 class WebtoonAdmin(admin.ModelAdmin):
     inlines = (
         TagInline,
     )
 
 
+class DayOfWeekAdmin(admin.ModelAdmin):
+    inlines = (
+        WebtoonInline,
+    )
+
+
 admin.site.register(UserProfile)
-admin.site.register(DayOfWeek)
+admin.site.register(DayOfWeek, DayOfWeekAdmin)
 admin.site.register(Webtoon, WebtoonAdmin)
 admin.site.register(Episode)
 admin.site.register(Comment)
