@@ -120,7 +120,7 @@ class UserAPIView(RetrieveUpdateDestroyAPIView):
 
 
 class WebtoonListAPIView(APIView):
-    permission_classes = [IsAuthorOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
     def get(self, request):
         queryset = Webtoon.objects.all()
         serializer = WebtoonInfoSerializer(queryset, many=True)
