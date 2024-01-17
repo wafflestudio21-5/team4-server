@@ -1,4 +1,6 @@
 from django.http import Http404
+from django.shortcuts import get_object_or_404
+from django.core.validators import MaxLengthValidator, MinLengthValidator
 
 from user.models import User
 from rest_framework import serializers
@@ -19,13 +21,16 @@ class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ['content']
+        extra_kwargs = {
+            'content': {'validators': [MaxLengthValidator(20), MinLengthValidator(1)]}
+        }
 
-    def run_validation(self, data):
-        try:
-            value = Tag.objects.get(pk=data['content'])
-        except:
-            value = Tag.objects.create(pk=data['content'])
-        return value
+    # def run_validation(self, data):
+    #     try:
+    #         value = Tag.objects.get(pk=data['content'])
+    #     except:
+    #         value = Tag.objects.create(pk=data['content'])
+    #     return value
 
 
 class DayOfWeekSerializer(serializers.ModelSerializer):
@@ -33,7 +38,6 @@ class DayOfWeekSerializer(serializers.ModelSerializer):
     class Meta:
         model = DayOfWeek
         fields = ['name']
-
 
 
 class WebtoonInfoSerializer(serializers.ModelSerializer):
@@ -61,23 +65,28 @@ class WebtoonContentSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         tags = validated_data.pop('tags')
         uploadDays = validated_data.pop('uploadDays')
+
+        # uploadDay 유효성 체크
+        uploadDayObjects = []
+        for day_data in uploadDays:
+            uploadDay = get_object_or_404(DayOfWeek, name=day_data['name'])
+            uploadDayObjects.append(uploadDay)
+
         webtoon = Webtoon.objects.create(**validated_data)
 
         for tag_data in tags:
-            try :
-                tag = Tag.objects.get(content=tag_data['content'])
-            except :
-                tag = Tag.objects.create(content=tag_data['content'])
-                tag.save()
+            tag, created = Tag.objects.get_or_create(content=tag_data['content'])
             tag.webtoons.add(webtoon)
+        # for tag in tags:
+        #     tag.webtoons.add(webtoon)
 
-        for day_data in uploadDays:
-            try :
-                uploadDay = DayOfWeek.objects.get(name=day_data['name'])
-            except :
-                uploadDay = DayOfWeek.objects.create(name=day_data['name'])
-                uploadDay.save()
+        for uploadDay in uploadDayObjects:
             webtoon.uploadDays.add(uploadDay)
+        # for tag in tags:
+        #     tag.webtoons.add(webtoon)
+        # for day in uploadDays:
+        #     day.webtoons.add(webtoon)
+
         return webtoon
 
     def update(self, instance, validated_data):

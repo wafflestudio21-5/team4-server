@@ -8,10 +8,14 @@ from .validators import isDayName
 
 # Create your models here.
 class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     name = models.CharField(blank=False, max_length=50, unique=True)
     isAuthor = models.BooleanField(default=False)
     
     subscribers = models.ManyToManyField('self', symmetrical=False, blank=True, related_name='subscribingAuthors') # 구독자
+
+    def __str__(self):
+        return self.user.nickname
 
 
 class DayOfWeek(models.Model):

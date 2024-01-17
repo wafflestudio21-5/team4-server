@@ -20,7 +20,11 @@ from .serializers import (WebtoonContentSerializer,
                           # CommentInfoSerializer,
                           CommentContentSerializer,
                           )
-from .permissions import IsWebtoonAuthorOrReadOnly, IsEpisodeAuthorOrReadOnly, IsCommentAuthorOrReadOnly
+from .permissions import (IsAuthorOrReadOnly,
+                          IsWebtoonAuthorOrReadOnly,
+                          IsEpisodeAuthorOrReadOnly,
+                          IsCommentAuthorOrReadOnly,
+                          )
 from .validators import isDayName
 
 
@@ -116,6 +120,7 @@ class UserAPIView(RetrieveUpdateDestroyAPIView):
 
 
 class WebtoonListAPIView(APIView):
+    permission_classes = [IsAuthorOrReadOnly]
     def get(self, request):
         queryset = Webtoon.objects.all()
         serializer = WebtoonInfoSerializer(queryset, many=True)
@@ -125,7 +130,7 @@ class WebtoonListAPIView(APIView):
         if "tags" not in request.data :
             request.data['tags'] = []
 
-        serializer = WebtoonContentSerializer(data = request.data)
+        serializer = WebtoonContentSerializer (data = request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save(author=request.user)
             return Response(serializer.data, status=201)
