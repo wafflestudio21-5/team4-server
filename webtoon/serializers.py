@@ -107,12 +107,13 @@ class WebtoonContentSerializer(serializers.ModelSerializer):
                 instance.uploadDays.add(DayOfWeek.objects.get(name=uploadDay['name']))
 
         # tags 수정
-        tags = validated_data.get('tags', instance.tags)
-        if hasattr(tags, '__iter__'):
+        tags = validated_data.get('tags')
+        if tags is not None:
             for tag in instance.tags.all():
                 instance.tags.remove(tag)
             for tag in tags:
-                instance.tags.add(tag)
+                tag_object, created = Tag.objects.get_or_create(content=tag.get('content'))
+                instance.tags.add(tag_object)
         instance.update_rating()
         instance.save()
         return instance
