@@ -138,11 +138,13 @@ class WebtoonListAPIView(APIView):
 
 
 class WebtoonListFinishedAPIView(generics.ListAPIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = Webtoon.objects.filter(isFinished=True)
     serializer_class = WebtoonInfoSerializer
 
 
 class WebtoonListRecentAPIView(generics.ListAPIView):
+    [IsAuthenticatedOrReadOnly]
     serializer_class = WebtoonInfoSerializer
 
     def get_queryset(self):
