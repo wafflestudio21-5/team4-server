@@ -46,8 +46,8 @@ class WebtoonInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Webtoon
         #fields = ['id', 'title', 'titleImage', 'releasedDate']
-        fields = ['id', 'title', 'releasedDate', 'author']
-        read_only_fields = ['releasedDate', 'author']
+        fields = ['id', 'title', 'releasedDate', 'author', 'totalRating']
+        read_only_fields = ['releasedDate', 'author', 'totalRating']
 
 
 class WebtoonContentSerializer(serializers.ModelSerializer):
