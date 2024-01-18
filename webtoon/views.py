@@ -23,6 +23,7 @@ from .serializers import (WebtoonContentSerializer,
 from .permissions import (IsAuthorOrReadOnly,
                           IsWebtoonAuthorOrReadOnly,
                           IsEpisodeAuthorOrReadOnly,
+                          IsEpisodeWebtoonAuthorOrReadOnly,
                           IsCommentAuthorOrReadOnly,
                           )
 from .validators import isDayName
@@ -163,8 +164,9 @@ class DayWebtoonListAPIView(generics.ListAPIView):
 
 
 class EpisodeListAPIView(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly, IsEpisodeWebtoonAuthorOrReadOnly]
     def getWebtoon(self, pk):
-        return Webtoon.objects.get(pk = pk)
+        return get_object_or_404(Webtoon, pk=pk)
 
     def get(self, request, pk):
         webtoon = self.getWebtoon(pk)
@@ -182,6 +184,7 @@ class EpisodeListAPIView(APIView):
     
 
 class TagWebtoonAPIView(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
     def getTag(self, pk):
         return Tag.objects.get(pk = pk)
 

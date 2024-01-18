@@ -1,4 +1,5 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
+from .models import Webtoon
 
 
 class IsAuthorOrReadOnly(BasePermission):
@@ -20,6 +21,18 @@ class IsEpisodeAuthorOrReadOnly(BasePermission):
         if request.method in SAFE_METHODS:
             return True
         return request.user == obj.webtoon.author
+
+
+class IsEpisodeWebtoonAuthorOrReadOnly(BasePermission):
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+        webtoonPk = view.kwargs.get('pk')
+        try:
+            webtoon = Webtoon.objects.get(pk=webtoonPk)
+        except Webtoon.DoesNotExist:
+            return False
+        return webtoon.author == request.user
 
 
 class IsCommentAuthorOrReadOnly(BasePermission):
