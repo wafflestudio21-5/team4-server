@@ -17,12 +17,15 @@ from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+ROOT_DIR = BASE_DIR
+load_dotenv(os.path.join(BASE_DIR, '.env'))
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-8yp7ddcg-1jzw42zrg@#_e%$lgk1a2qq!0dhsbf_n2r1u&npn('
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -43,8 +46,9 @@ INSTALLED_APPS = [
 
     'user',
     'drf_yasg',
+
     'webtoon',
-    
+  
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
@@ -58,6 +62,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google', # <- 필요한 소셜 로그인 추가
     
     'widget_tweaks',
+    
 ]
 
 SITE_ID = 1
@@ -133,6 +138,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_DIR = os.path.join(BASE_DIR, 'static')
+STATICFILES_DIRS = []
+STATIC_ROOT = os.path.join(ROOT_DIR, 'static')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -152,7 +160,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # Email Settings
-LOGIN_URL = 'account-auth'
+LOGIN_URL = 'rest_login'
 ACCOUNT_SIGNUP_REDIRECT_URL = 'account-email-sent'
 ACCOUNT_LOGOUT_ON_GET = True
 
@@ -160,8 +168,8 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "silee11033@gmail.com"
-EMAIL_HOST_PASSWORD = "tzrh vgjj zerv qryl"
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
@@ -181,7 +189,7 @@ REST_FRAMEWORK = {
 REST_AUTH = {
     'LOGIN_SERIALIZER': 'user.serializers.CustomLoginSerializer',
     'REGISTER_SERIALIZER': 'user.serializers.CustomRegisterSerializer',
-
+    # 'PASSWORD_RESET_CONFIRM_SERIALIZER': 'user.serializers.CustomPasswordResetConfirmSerializer',
     'TOKEN_MODEL': None,
     'USE_JWT': True,
     'JWT_AUTH_COOKIE' : 'access',
