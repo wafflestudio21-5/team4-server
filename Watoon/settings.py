@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
 
     'user',
+    'drf_yasg',
     'webtoon',
     
     'rest_framework',
