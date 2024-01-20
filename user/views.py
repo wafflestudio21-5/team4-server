@@ -95,3 +95,4 @@ class CustomLoginView(LoginView):
     
 class CustomRegisterView(RegisterView):
     permission_classes = (IsNotAuthenticated,)
+

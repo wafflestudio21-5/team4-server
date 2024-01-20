@@ -22,7 +22,6 @@ urlpatterns = [
     path('', CustomRegisterView.as_view(), name='rest_register'),
     path('verify-email/', CustomVerifyEmailView.as_view(), name='rest_verify_email'),
     path('resend-email/', ResendEmailVerificationView.as_view(), name="rest_resend_email"),
-
 ]
 
 if settings.REST_USE_JWT:

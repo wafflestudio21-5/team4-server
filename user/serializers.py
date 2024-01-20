@@ -36,12 +36,13 @@ class CustomRegisterSerializer(RegisterSerializer):
     password1 = serializers.CharField(write_only=True)
     password2 = serializers.CharField(write_only=True)
     
+    
     def save(self, request):
         user = super().save(request)
         user.nickname = self.data.get('nickname')
         user.save()
         return user
-
+        
     def validate_nickname(self, nickname):
         # Check for special characters in the nickname
         if not nickname.isalnum():
