@@ -43,9 +43,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-    
+
     'user',
     'drf_yasg',
+
+    'webtoon',
+  
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
@@ -59,6 +62,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google', # <- 필요한 소셜 로그인 추가
     
     'widget_tweaks',
+    
 ]
 
 SITE_ID = 1
