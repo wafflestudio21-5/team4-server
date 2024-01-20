@@ -141,7 +141,7 @@ class UserAPIView(RetrieveUpdateDestroyAPIView):
 
 
 class WebtoonListAPIView(APIView, PaginationHandlerMixin):
-    permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     pagination_class = WebtoonCursorPagination
 
     def get_queryset(self):
