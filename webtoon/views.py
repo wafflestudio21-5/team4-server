@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.contrib.contenttypes.models import ContentType
 
+from user.models import User
 
 from .models import Webtoon, Comment, DayOfWeek, Episode, Tag, UserProfile 
 from .serializers import (WebtoonContentSerializer,
@@ -143,6 +144,7 @@ class UserAPIView(RetrieveUpdateDestroyAPIView):
 class WebtoonListAPIView(APIView, PaginationHandlerMixin):
     permission_classes = [IsAuthenticatedOrReadOnly]
     pagination_class = WebtoonCursorPagination
+    serializer_class = WebtoonContentSerializer
 
     def get_queryset(self):
         queryset = Webtoon.objects.all()
@@ -206,6 +208,7 @@ class DayWebtoonListAPIView(generics.ListAPIView):
 class EpisodeListAPIView(APIView, PaginationHandlerMixin):
     permission_classes = [IsAuthenticatedOrReadOnly, IsEpisodeWebtoonAuthorOrReadOnly]
     pagination_class = EpisodeCursorPagination
+    serializer_class = EpisodeContentSerializer
 
     def getWebtoon(self, pk):
         return get_object_or_404(Webtoon, pk=pk)
@@ -295,4 +298,14 @@ class EpisodeCommentAPIView(generics.ListCreateAPIView):
         createdBy = self.request.user
         commentOn = self.get_episode()
         serializer.save(createdBy=createdBy, commentOn=commentOn)
+
+
+class UploadWebtoonListAPIView(generics.ListAPIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    serializer_class = WebtoonInfoSerializer
+
+    def get_queryset(self):
+        user = get_object_or_404(User, pk=self.kwargs.get('pk'))
+        queryset = Webtoon.objects.filter(author=user)
+        return orderByLatestEpisode(queryset)
         
