@@ -12,6 +12,7 @@ from .views import (WebtoonAPIView,
                     EpisodeCommentAPIView,
                     # new views
                     SubCommentListAPIView,
+                    UploadWebtoonListAPIView,
                    )
 
 urlpatterns = [
@@ -28,5 +29,7 @@ urlpatterns = [
 
     # new endpoints
     path('api/comment/<int:pk>/comment', SubCommentListAPIView.as_view()),
+
+    path('api/profile/<int:pk>/uploadWebtoonList', UploadWebtoonListAPIView.as_view()),
 
 ]
