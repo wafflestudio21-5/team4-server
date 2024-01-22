@@ -137,11 +137,13 @@ class EpisodeInfoSerializer(serializers.ModelSerializer):
 class EpisodeContentSerializer(serializers.ModelSerializer):
     """Episode 페이지 안에서의 Serializer"""
     webtoon = WebtoonInfoSerializer(read_only=True)
+    previousEpisode = serializers.SerializerMethodField(method_name='getPreviousEpisode', read_only=True)
+    nextEpisode = serializers.SerializerMethodField(method_name='getNextEpisode', read_only=True)
     class Meta:
         model = Episode
-        fields = ['id', 'title', 'episodeNumber', 'rating', 'releasedDate', 'webtoon']
+        fields = ['id', 'title', 'episodeNumber', 'rating', 'releasedDate', 'webtoon', 'previousEpisode', 'nextEpisode']
         #fields = ['id', 'title', 'episodeNumber', 'thumbnail', 'content', 'rating', 'releasedDate']
-        read_only_fields = ['rating', 'releasedDate']
+        read_only_fields = ['rating', 'releasedDate', 'previousEpisode', 'nextEpisode']
     
     def update(self, instance, validated_data):
         for key in validated_data:
@@ -154,6 +156,22 @@ class EpisodeContentSerializer(serializers.ModelSerializer):
         instance.save()
         instance.webtoon.update_rating()
         return instance
+
+    def getPreviousEpisode(self, obj):
+        n = obj.episodeNumber
+        webtoon = obj.webtoon
+        nextEpisode = Episode.objects.filter(episodeNumber=n-1, webtoon=webtoon)
+        if nextEpisode.exists():
+            return nextEpisode[0].id
+        return None
+
+    def getNextEpisode(self, obj):
+        n = obj.episodeNumber
+        webtoon = obj.webtoon
+        nextEpisode = Episode.objects.filter(episodeNumber=n+1, webtoon=webtoon)
+        if nextEpisode.exists():
+            return nextEpisode[0].id
+        return None
     
 
 class SubscriberUserSerializer(serializers.ModelSerializer):
