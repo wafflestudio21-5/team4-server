@@ -13,13 +13,15 @@ from .views import (WebtoonAPIView,
                     # new views
                     SubCommentListAPIView,
                     UploadWebtoonListAPIView,
+                    WebtoonSearchView,
                    )
 
 urlpatterns = [
     path('api/webtoonList', WebtoonListAPIView.as_view()), 
     path('api/webtoonList/finished', WebtoonListFinishedAPIView.as_view()), 
-    path('api/webtoonList/recent', WebtoonListRecentAPIView.as_view()), 
-    path('api/webtoonList/<str:day>', DayWebtoonListAPIView.as_view()), 
+    path('api/webtoonList/recent', WebtoonListRecentAPIView.as_view()),
+    path('api/webtoonList/search', WebtoonSearchView.as_view()),
+    path('api/webtoonList/<str:day>', DayWebtoonListAPIView.as_view()),
     path('api/webtoon/<int:pk>', WebtoonAPIView.as_view()), 
     path('api/webtoon/<int:pk>/episode', EpisodeListAPIView.as_view()), 
     path('api/episode/<int:pk>', EpisodeAPIView.as_view()), 

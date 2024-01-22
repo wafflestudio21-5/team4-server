@@ -2,6 +2,9 @@ from django.shortcuts import get_object_or_404
 from django.contrib.contenttypes.models import ContentType
 from django.http import Http404
 from django.db.models import Subquery, OuterRef
+
+from django_filters.rest_framework import DjangoFilterBackend
+
 from rest_framework import status
 from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
@@ -9,6 +12,7 @@ from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework import filters
 from django.contrib.contenttypes.models import ContentType
 
 from user.models import User
@@ -308,4 +312,14 @@ class UploadWebtoonListAPIView(generics.ListAPIView):
         user = get_object_or_404(User, pk=self.kwargs.get('pk'))
         queryset = Webtoon.objects.filter(author=user)
         return orderByLatestEpisode(queryset)
+
+
+class WebtoonSearchView(generics.ListAPIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    queryset = Webtoon.objects.all()
+    serializer_class = WebtoonInfoSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['title']
         
+
+
