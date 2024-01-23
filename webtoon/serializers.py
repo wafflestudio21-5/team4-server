@@ -38,6 +38,9 @@ class DayOfWeekSerializer(serializers.ModelSerializer):
     class Meta:
         model = DayOfWeek
         fields = ['name']
+        extra_kwargs = {
+            'name': {'validators': []}
+        }
 
 
 class WebtoonInfoSerializer(serializers.ModelSerializer):
