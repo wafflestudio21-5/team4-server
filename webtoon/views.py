@@ -314,6 +314,14 @@ class UploadWebtoonListAPIView(generics.ListAPIView):
         return orderByLatestEpisode(queryset)
 
 
+class SubscribeWebtoonListAPIView(generics.ListAPIView):
+    serializer_class = WebtoonInfoSerializer
+
+    def get_queryset(self):
+        queryset = Webtoon.objects.filter(subscribers=self.request.user)
+        return orderByLatestEpisode(queryset)
+
+
 class WebtoonSearchView(generics.ListAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = Webtoon.objects.all()

@@ -13,6 +13,7 @@ from .views import (WebtoonAPIView,
                     # new views
                     SubCommentListAPIView,
                     UploadWebtoonListAPIView,
+                    SubscribeWebtoonListAPIView,
                     WebtoonSearchView,
                    )
 
@@ -33,5 +34,5 @@ urlpatterns = [
     path('api/comment/<int:pk>/comment', SubCommentListAPIView.as_view()),
 
     path('api/profile/<int:pk>/uploadWebtoonList', UploadWebtoonListAPIView.as_view()),
-
+    path('api/profile/subscribeWebtoonList', SubscribeWebtoonListAPIView.as_view()),
 ]
