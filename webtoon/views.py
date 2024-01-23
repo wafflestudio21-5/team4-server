@@ -25,6 +25,7 @@ from .serializers import (WebtoonContentSerializer,
                           EpisodeContentSerializer,
                           # CommentInfoSerializer,
                           CommentContentSerializer,
+                          DayOfWeekSerializer
                           )
 from .permissions import (IsAuthorOrReadOnly,
                           IsWebtoonAuthorOrReadOnly,
@@ -351,4 +352,5 @@ class WebtoonSearchView(generics.ListAPIView):
     search_fields = ['title']
         
 
-
+class DayOfWeekCreateAPIView(generics.CreateAPIView):
+    serializer_class = DayOfWeekSerializer

@@ -21,7 +21,7 @@ class UserProfile(models.Model):
 class DayOfWeek(models.Model):
     """요일 모델 : 요일별 웹툰 분류를 위해 사용"""
     # 요일 이름 : Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday
-    name = models.CharField(max_length=10, validators=[isDayName])
+    name = models.CharField(max_length=10, validators=[isDayName], unique=True)
 
     def __str__(self):
         return self.name
