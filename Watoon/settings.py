@@ -62,7 +62,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google', # <- 필요한 소셜 로그인 추가
     
     'widget_tweaks',
-    
+
+    'django_filters',
 ]
 
 SITE_ID = 1
