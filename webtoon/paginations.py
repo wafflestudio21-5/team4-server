@@ -3,7 +3,7 @@ from rest_framework.pagination import CursorPagination
 
 class CommentCursorPagination(CursorPagination):
     ordering = '-dtCreated'
-    page_size = 30
+    page_size = 15
 
 
 class PaginationHandlerMixin(object):
@@ -31,10 +31,10 @@ class PaginationHandlerMixin(object):
 
 
 class WebtoonCursorPagination(CursorPagination):
-    page_size = 30
-    ordering = ['-latestEpisodeCreated']
+    page_size = 9
+    ordering = '-releasedDate'
 
 
 class EpisodeCursorPagination(CursorPagination):
-    page_size = 30
+    page_size = 15
     ordering = ['-episodeNumber']

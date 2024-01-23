@@ -41,15 +41,15 @@ from .paginations import (CommentCursorPagination,
                           )
 
 
-def orderByLatestEpisode(queryset):
+def annotateLatestUploadDate(queryset):
     """Webtoon queryset을 가장 최근 에피소드 업로드 순으로 정렬"""
     queryset = queryset.annotate(
-        latestEpisodeCreated=Subquery(
+        latestUploadDate=Subquery(
             Episode.objects.filter(
                 webtoon_id=OuterRef('pk')
-            ).order_by('-releasedDate').values('releasedDate')[:1]
+            ).order_by('-releasedDate').values('releasedDate')[0]
         )
-    ).order_by('-latestEpisodeCreated')
+    )
 
     return queryset
 
@@ -154,7 +154,8 @@ class WebtoonListAPIView(APIView, PaginationHandlerMixin):
     def get_queryset(self):
         queryset = Webtoon.objects.all()
         # 최근 업로드 에피소드의 업로드 시간 기준 정렬
-        return orderByLatestEpisode(queryset)
+        # return annotateLatestUploadDate(queryset)
+        return queryset
 
     def get_serializer_context(self):
         return {
@@ -180,7 +181,9 @@ class WebtoonListAPIView(APIView, PaginationHandlerMixin):
         if "tags" not in request.data :
             request.data['tags'] = []
 
-        serializer = WebtoonContentSerializer (data = request.data)
+        kwargs = {'context': self.get_serializer_context()}
+
+        serializer = WebtoonContentSerializer (data = request.data, **kwargs)
         if serializer.is_valid(raise_exception=True):
             serializer.save(author=request.user)
             return Response(serializer.data, status=201)
@@ -195,7 +198,8 @@ class WebtoonListFinishedAPIView(generics.ListAPIView):
     def get_queryset(self):
         queryset = Webtoon.objects.filter(isFinished=True)
         # 최근 업로드 에피소드의 업로드 시간 기준 정렬
-        return orderByLatestEpisode(queryset)
+        # return orderByLatestEpisode(queryset)
+        return queryset
 
 
 class WebtoonListRecentAPIView(generics.ListAPIView):
@@ -207,7 +211,8 @@ class WebtoonListRecentAPIView(generics.ListAPIView):
         from datetime import date, timedelta
         today = date.today()
         queryset = Webtoon.objects.filter(releasedDate__gte=today - timedelta(21))
-        return orderByLatestEpisode(queryset)
+        # return orderByLatestEpisode(queryset)
+        return queryset
 
 
 class DayWebtoonListAPIView(generics.ListAPIView):
@@ -218,7 +223,8 @@ class DayWebtoonListAPIView(generics.ListAPIView):
     def get_queryset(self):
         day = get_object_or_404(DayOfWeek, name=self.kwargs.get('day'))
         queryset = Webtoon.objects.filter(uploadDays=day)
-        return orderByLatestEpisode(queryset)
+        # return orderByLatestEpisode(queryset)
+        return queryset
 
 
 class EpisodeListAPIView(APIView, PaginationHandlerMixin):
@@ -268,7 +274,8 @@ class TagWebtoonAPIView(generics.ListAPIView):
     def get_queryset(self):
         tag = self.getTag(self.kwargs.get('content'))
         queryset = Webtoon.objects.filter(tags=tag)
-        return orderByLatestEpisode(queryset)
+        # return orderByLatestEpisode(queryset)
+        return queryset
 
     # def get(self, request, content):
     #     tag = self.getTag(content)
@@ -332,7 +339,8 @@ class UploadWebtoonListAPIView(generics.ListAPIView):
     def get_queryset(self):
         user = get_object_or_404(User, pk=self.kwargs.get('pk'))
         queryset = Webtoon.objects.filter(author=user)
-        return orderByLatestEpisode(queryset)
+        # return orderByLatestEpisode(queryset)
+        return queryset
 
 
 class WebtoonSubscribeAPIView(APIView):
@@ -350,7 +358,8 @@ class SubscribeWebtoonListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         queryset = Webtoon.objects.filter(subscribers=self.request.user)
-        return orderByLatestEpisode(queryset)
+        # return orderByLatestEpisode(queryset)
+        return queryset
 
 
 class WebtoonSearchView(generics.ListAPIView):
