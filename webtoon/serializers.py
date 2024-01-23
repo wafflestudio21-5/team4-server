@@ -43,11 +43,18 @@ class DayOfWeekSerializer(serializers.ModelSerializer):
 class WebtoonInfoSerializer(serializers.ModelSerializer):
     """Webtoon 리스트에서 보여지는 Webtoon의 Serializer"""
     author = UserSerializer(read_only = True)
+    subscribing = serializers.SerializerMethodField(method_name='isSubscribing', read_only=True)
     class Meta:
         model = Webtoon
         #fields = ['id', 'title', 'titleImage', 'releasedDate']
-        fields = ['id', 'title', 'releasedDate', 'author', 'totalRating']
-        read_only_fields = ['releasedDate', 'author', 'totalRating']
+        fields = ['id', 'title', 'releasedDate', 'author', 'totalRating', 'subscribing']
+        read_only_fields = ['releasedDate', 'author', 'totalRating', 'subscribing']
+
+    def isSubscribing(self, obj):
+        user = self.context.get('request').user
+        if not user.is_authenticated:
+            return False
+        return obj.subscribers.filter(pk=user.pk).exists()
 
 
 class WebtoonContentSerializer(serializers.ModelSerializer):
@@ -55,13 +62,14 @@ class WebtoonContentSerializer(serializers.ModelSerializer):
     uploadDays = DayOfWeekSerializer(many=True)
     tags = TagSerializer(many=True, required=False)
     author = UserSerializer(read_only = True)
+    subscribing = serializers.SerializerMethodField(method_name='isSubscribing', read_only=True)
     subscribeCount = serializers.SerializerMethodField(method_name='getSubscribeCount', read_only=True)
     episodeCount = serializers.SerializerMethodField(method_name='getEpisodeCount', read_only=True)
     class Meta:
         model = Webtoon
-        fields = ['id', 'title', 'description', 'uploadDays', 'author', 'totalRating', 'episodeCount', 'isFinished', 'tags', 'subscribeCount']
+        fields = ['id', 'title', 'description', 'uploadDays', 'author', 'totalRating', 'episodeCount', 'isFinished', 'tags', 'subscribing', 'subscribeCount']
         #fields = ['id', 'title', 'titleImage', 'description', 'uploadDays', 'author', 'totalRating', 'tags']
-        read_only_fields = ['author', 'releasedDate', 'subscribeCount', 'totalRating', 'episodeCount']
+        read_only_fields = ['author', 'releasedDate', 'subscribing', 'subscribeCount', 'totalRating', 'episodeCount']
        
     def create(self, validated_data):
         tags = validated_data.pop('tags')
@@ -117,6 +125,12 @@ class WebtoonContentSerializer(serializers.ModelSerializer):
         instance.update_rating()
         instance.save()
         return instance
+
+    def isSubscribing(self, obj):
+        user = self.context.get('request').user
+        if not user.is_authenticated:
+            return False
+        return obj.subscribers.filter(pk=user.pk).exists()
 
     def getSubscribeCount(self, obj):
         return obj.subscribers.count()

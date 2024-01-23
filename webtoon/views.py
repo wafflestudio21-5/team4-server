@@ -155,13 +155,24 @@ class WebtoonListAPIView(APIView, PaginationHandlerMixin):
         # 최근 업로드 에피소드의 업로드 시간 기준 정렬
         return orderByLatestEpisode(queryset)
 
+    def get_serializer_context(self):
+        return {
+            'request': self.request,
+            'format': self.format_kwarg,
+            'view': self
+        }
+
     def get(self, request):
         instance = self.get_queryset()
+
+        serializer_class = WebtoonInfoSerializer
+        kwargs = {'context': self.get_serializer_context()}
+
         page = self.paginate_queryset(instance)
         if page is not None:
-            serializer = self.get_paginated_response(WebtoonInfoSerializer(page, many=True).data)
+            serializer = self.get_paginated_response(serializer_class(page, many=True, **kwargs).data)
         else:
-            serializer = WebtoonInfoSerializer(instance, many=True)
+            serializer = WebtoonInfoSerializer(instance, many=True, **kwargs)
         return Response(serializer.data)
 
     def post(self, request):
@@ -312,6 +323,16 @@ class UploadWebtoonListAPIView(generics.ListAPIView):
         user = get_object_or_404(User, pk=self.kwargs.get('pk'))
         queryset = Webtoon.objects.filter(author=user)
         return orderByLatestEpisode(queryset)
+
+
+class WebtoonSubscribeAPIView(APIView):
+    def post(self, request, pk):
+        webtoon = get_object_or_404(Webtoon, pk=pk)
+        if request.user.subscribingWebtoons.filter(pk=webtoon.pk).exists():
+            webtoon.subscribers.remove(request.user)
+        else:
+            webtoon.subscribers.add(request.user)
+        return Response(status=status.HTTP_200_OK)
 
 
 class SubscribeWebtoonListAPIView(generics.ListAPIView):

@@ -1,6 +1,7 @@
 from django.urls import path
 
-from .views import (WebtoonAPIView, 
+from .views import (WebtoonAPIView,
+                    WebtoonSubscribeAPIView,
                     EpisodeAPIView, 
                     CommentAPIView, 
                     WebtoonListAPIView,
@@ -24,7 +25,8 @@ urlpatterns = [
     path('api/webtoonList/search', WebtoonSearchView.as_view()),
     path('api/webtoonList/<str:day>', DayWebtoonListAPIView.as_view()),
     path('api/webtoon/<int:pk>', WebtoonAPIView.as_view()), 
-    path('api/webtoon/<int:pk>/episode', EpisodeListAPIView.as_view()), 
+    path('api/webtoon/<int:pk>/episode', EpisodeListAPIView.as_view()),
+    path('api/webtoon/<int:pk>/subscribe', WebtoonSubscribeAPIView.as_view()),
     path('api/episode/<int:pk>', EpisodeAPIView.as_view()), 
     path('api/episode/<int:pk>/comment', EpisodeCommentAPIView.as_view()),
     path('api/comment/<int:pk>', CommentAPIView.as_view()),
