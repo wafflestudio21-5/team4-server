@@ -229,19 +229,28 @@ class EpisodeListAPIView(APIView, PaginationHandlerMixin):
     def getWebtoon(self, pk):
         return get_object_or_404(Webtoon, pk=pk)
 
+    def get_serializer_context(self):
+        return {
+            'request': self.request,
+            'format': self.format_kwarg,
+            'view': self
+        }
+
     def get(self, request, pk):
         webtoon = self.getWebtoon(pk)
         instance = Episode.objects.filter(webtoon=webtoon)
+        kwargs = {'context': self.get_serializer_context()}
         page = self.paginate_queryset(instance)
         if page is not None:
-            serializer = self.get_paginated_response(EpisodeInfoSerializer(page, many=True).data)
+            serializer = self.get_paginated_response(EpisodeInfoSerializer(page, many=True, **kwargs).data)
         else:
-            serializer = EpisodeInfoSerializer(instance, many=True)
+            serializer = EpisodeInfoSerializer(instance, many=True, **kwargs)
         return Response(serializer.data)
 
     def post(self, request, pk):
         webtoon = self.getWebtoon(pk)
-        serializer = EpisodeContentSerializer(data = request.data)
+        kwargs = {'context': self.get_serializer_context()}
+        serializer = EpisodeContentSerializer(data = request.data, **kwargs)
         if serializer.is_valid(raise_exception=True):
             serializer.save(webtoon=webtoon)
             return Response(serializer.data, status=201)
