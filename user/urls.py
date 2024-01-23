@@ -14,7 +14,7 @@ from .views import CustomVerifyEmailView, CustomLoginView, CustomLogoutView, Cus
 
 urlpatterns = [
     path('password/reset/', PasswordResetView.as_view(), name='rest_password_reset'), # TODO: error occured
-    path('password/reset/confirm/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'), # TODO: error occured
+    path('password/reset/confirm/<uidb64>/<token>/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'), # TODO: error occured
        
     path('login/', CustomLoginView.as_view(), name='rest_login'),
     path('logout/', CustomLogoutView.as_view(), name='rest_logout'),
