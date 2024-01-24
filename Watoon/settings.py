@@ -108,11 +108,11 @@ WSGI_APPLICATION = 'Watoon.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ebdb',
-        'USER': 'admin',
-        'PASSWORD': 'Django123!',
-        'HOST': 'awseb-e-scwiijt6ek-stack-awsebrdsdatabase-6ixfaz70rlgk.cjsc2i462lxx.ap-northeast-2.rds.amazonaws.com',
-        'PORT': '3306',
+        'NAME': os.getenv("DB_NAME"),
+        'USER': os.getenv("DB_USER"),
+        'PASSWORD': os.getenv("DB_PASSWORD"),
+        'HOST': os.getenv("DB_HOST"),
+        'PORT': os.getenv("DB_PORT"),
     }
 }
 
