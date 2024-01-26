@@ -28,3 +28,6 @@ https://velog.io/@yevini118/Django-allauth-카카오-로그인하기
 + 앱 아이콘 등록 후 비즈앱 전환 해야 이메일 얻기 가능
 
 + 테스트할때 자신의 컴퓨터 ip를 허용 ip에 놓기
++ 
+2024-01-12 View 1차 구현
+ - user와 webtoon 앱의 migration이 각각 작동해서 실제 migration 하실 때 user것 먼저, 그 다음에 webtoon 것으로 해야 할 것 같습니다. 이유는 잘 모르겠지만 추후 수정하겠습니다. 

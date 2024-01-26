@@ -40,6 +40,9 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
+    # webtoon
+    path('', include('webtoon.urls')),
+    
     # admin
     path('admin/', admin.site.urls),
 
