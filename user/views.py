@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.exceptions import ValidationError
+from rest_framework.views import APIView
 
 from dj_rest_auth.registration.views import VerifyEmailView, RegisterView, SocialLoginView
 from dj_rest_auth.views import LoginView, LogoutView, PasswordResetConfirmView
@@ -108,9 +109,79 @@ class CustomRegisterView(RegisterView):
 
 
 BASE_URL = 'http://localhost:8000/'
-KAKAO_CALLBACK_URI = BASE_URL + 'kakao/callback/'
+KAKAO_CALLBACK_URI = BASE_URL + 'accounts/kakao/callback/'
 GOOGLE_CALLBACK_URI = BASE_URL + 'accounts/google/callback/'
 
+def kakao_login(request):
+    kakao_api = "https://kauth.kakao.com/oauth/authorize?response_type=code"
+    client_id = settings.SOCIAL_AUTH_KAKAO_REST_API_KEY
+    return redirect(f"{kakao_api}&client_id={client_id}&redirect_uri={KAKAO_CALLBACK_URI}")
+
+def kakao_callback(request):
+    auth_code = request.GET['code']
+    kakao_token_api = 'https://kauth.kakao.com/oauth/token'
+    data = {
+        'grant_type': 'authorization_code',
+        'client_id': settings.SOCIAL_AUTH_KAKAO_REST_API_KEY,
+        'redirection_uri': KAKAO_CALLBACK_URI,
+        'code': auth_code,
+    }
+
+    token_req = requests.post(kakao_token_api, data=data)
+    token_req_json = token_req.json()
+
+    error = token_req_json.get("error")
+
+    if error is not None:
+        raise JSONDecodeError(error)
+
+    access_token = token_req_json.get("access_token")
+
+    user_info_req = requests.get('https://kapi.kakao.com/v2/user/me', headers={'Authorization': f'Bearer {access_token}'})
+    user_info_req_status = user_info_req.status_code
+    
+    if user_info_req_status != 200:
+        return JsonResponse({'err_msg': 'failed to get user info'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    user_info_req_json = user_info_req.json()
+    kakao_account = user_info_req_json.get('kakao_account')
+    email = kakao_account.get('email')
+    nickname = kakao_account.get('profile').get('nickname')
+    print(email, nickname)
+    try:
+        user = User.objects.get(email=email)
+
+        social_user = SocialAccount.objects.get(user=user)
+
+        if social_user.provider != 'kakao':
+            return JsonResponse({'err_msg': 'no matching social type'}, status=status.HTTP_400_BAD_REQUEST)
+
+        data = {'access_token': access_token, 'code': auth_code}
+        accept = requests.post(f"{BASE_URL}accounts/kakao/login/finish/", data=data)
+        accept_status = accept.status_code
+
+        if accept_status != 200:
+            return JsonResponse({'err_msg': 'failed to signin'}, status=accept_status)
+
+        accept_json = accept.json()
+        accept_json.pop('user', None)
+        return JsonResponse(accept_json)
+
+    except User.DoesNotExist:
+        data = {'access_token': access_token, 'code': auth_code}
+        
+        accept = requests.post(f"{BASE_URL}accounts/kakao/login/finish/", data=data)
+        accept_status = accept.status_code
+
+        if accept_status != 200:
+            return JsonResponse({'err_msg': 'failed to signup'}, status=accept_status)
+
+        accept_json = accept.json()
+        accept_json.pop('user', None)
+        return JsonResponse(accept_json)
+
+    except SocialAccount.DoesNotExist:
+        return JsonResponse({'err_msg': 'email exists but not social user'}, status=status.HTTP_400_BAD_REQUEST)
 
 class KakaoLogin(SocialLoginView):
     permission_classes = (IsNotAuthenticated,)
@@ -132,14 +203,18 @@ def google_callback(request):
     token_req = requests.post(f"https://oauth2.googleapis.com/token?client_id={client_id}&client_secret={client_secret}&code={code}&grant_type=authorization_code&redirect_uri={GOOGLE_CALLBACK_URI}&state={state}")
     token_req_json = token_req.json()
     error = token_req_json.get("error")
+
     if error is not None:
         raise JSONDecodeError(error)
+    
     access_token = token_req_json.get("access_token")
 
     email_req = requests.post(f"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={access_token}")
     email_req_status = email_req.status_code
+    
     if email_req_status != 200:
         return JsonResponse({'err_msg': 'failed to get email'}, status=status.HTTP_400_BAD_REQUEST)
+    
     email_req_json = email_req.json()
     email = email_req_json.get("email")
     
@@ -171,11 +246,9 @@ def google_callback(request):
 
     except User.DoesNotExist:    # DoesNotExist -> Django Model에서 기본 지원
         # 전달받은 이메일로 기존에 가입된 유저가 아예 없으면 => 새로 회원가입 & 해당 유저의 jwt 발급
-        print("no user")
-        print("access token : ", access_token)
-        print("no user")
-        print("code : ", code)
-        data = {'access_token': access_token, 'code': code}
+        data = {'access_token': access_token, 'code': code, 'nickname': 'testasdf'}
+        ## 여기다 data에 추가하고 싶은 사항(nickname) 포함하면 될듯
+
         accept = requests.post(f"{BASE_URL}accounts/google/login/finish/", data=data)
         accept_status = accept.status_code
 
@@ -195,3 +268,10 @@ class GoogleLogin(SocialLoginView):
     adapter_class = CustomGoogleOAuth2Adapter
     callback_url = GOOGLE_CALLBACK_URI
     client_class = OAuth2Client
+
+
+def NickNameVerify(request, nickname):
+    user = User.objects.get(nickname=nickname)
+    if user is None:
+        return JsonResponse({"nickname" : "possible"})
+    return JsonResponse({"nickname": "impossible"})

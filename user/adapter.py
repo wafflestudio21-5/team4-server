@@ -1,5 +1,13 @@
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 import requests
+from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
+
+class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
+    def save_user(self, request, sociallogin, form=None):
+        user = super().save_user(request, sociallogin, form)
+        oauth_data = sociallogin.account.extra_data
+        user.nickname = oauth_data.get("name")
+        return user
 
 class CustomGoogleOAuth2Adapter(GoogleOAuth2Adapter):
     profile_url = "https://openidconnect.googleapis.com/v1/userinfo"
@@ -13,3 +21,4 @@ class CustomGoogleOAuth2Adapter(GoogleOAuth2Adapter):
         extra_data = resp.json()
         login = self.get_provider().sociallogin_from_response(request, extra_data)
         return login
+    
