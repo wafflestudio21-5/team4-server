@@ -249,3 +249,25 @@ ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = 'rest_verify_email'
 ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = 'rest_verify_email'
 ACCOUNT_EMAIL_SUBJECT_PREFIX = ""
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1
+
+
+
+#secret keys
+SOCIAL_AUTH_GOOGLE_CLIENT_ID = os.getenv("SOCIAL_AUTH_GOOGLE_CLIENT_ID")
+SOCIAL_AUTH_GOOGLE_CLIENT_SECRET = os.getenv("SOCIAL_AUTH_GOOGLE_CLIENT_SECRET")
+STATE = os.getenv("STATE")
+
+
+#socialaccount
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        # For each OAuth based provider, either add a ``SocialApp``
+        # (``socialaccount`` app) containing the required client
+        # credentials, or list them here:
+        'APP': {
+            'client_id': '820786943307-spispqn1iaocufqls6ctju8qs922mlc5.apps.googleusercontent.com',
+            'secret': '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',
+            'key': ''
+        }
+    }
+}

@@ -10,7 +10,8 @@ from dj_rest_auth.views import (
 from dj_rest_auth.registration.views import ResendEmailVerificationView
 from dj_rest_auth import urls
 
-from .views import CustomVerifyEmailView, CustomLoginView, CustomLogoutView, CustomRegisterView
+from .views import CustomVerifyEmailView, CustomLoginView, CustomLogoutView, CustomRegisterView, KakaoLogin, GoogleLogin
+from . import views
 
 urlpatterns = [
     path('password/reset/', PasswordResetView.as_view(), name='rest_password_reset'), # TODO: error occured
@@ -22,6 +23,10 @@ urlpatterns = [
     path('', CustomRegisterView.as_view(), name='rest_register'),
     path('verify-email/', CustomVerifyEmailView.as_view(), name='rest_verify_email'),
     path('resend-email/', ResendEmailVerificationView.as_view(), name="rest_resend_email"),
+    path('kakao/', KakaoLogin.as_view(), name='kakao'),
+    path('google/login/', views.google_login, name='google_login'),
+    path('google/callback/', views.google_callback, name='google_callback'),  
+    path('google/login/finish/', GoogleLogin.as_view(), name='google_login_to_django'),
 ]
 
 if settings.REST_USE_JWT:

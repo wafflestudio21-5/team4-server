@@ -47,7 +47,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         validators=[validate_no_special_characters]
         )
     password = models.CharField(max_length=128, validators=[validate_password])
-         
+
+
     is_active = models.BooleanField(default=True) 
     is_superuser = models.BooleanField(default=False)    
     is_staff = models.BooleanField(default=False)   
