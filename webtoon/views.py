@@ -11,13 +11,13 @@ from rest_framework.response import Response
 from rest_framework import generics 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework import filters
 from django.contrib.contenttypes.models import ContentType
 
 from user.models import User
 
-from .models import Webtoon, Comment, DayOfWeek, Episode, Tag, UserProfile 
+from .models import Webtoon, Comment, DayOfWeek, Episode, Tag, UserProfile, Rating, Like
 from .serializers import (WebtoonContentSerializer,
                           WebtoonInfoSerializer,
                           WebtoonContentSerializer,
@@ -25,7 +25,9 @@ from .serializers import (WebtoonContentSerializer,
                           EpisodeContentSerializer,
                           # CommentInfoSerializer,
                           CommentContentSerializer,
-                          DayOfWeekSerializer
+                          DayOfWeekSerializer, 
+                          RatingSerializer, 
+                          LikeSerializer
                           )
 from .permissions import (IsAuthorOrReadOnly,
                           IsWebtoonAuthorOrReadOnly,
@@ -372,3 +374,141 @@ class WebtoonSearchView(generics.ListAPIView):
 
 class DayOfWeekCreateAPIView(generics.CreateAPIView):
     serializer_class = DayOfWeekSerializer
+    
+
+class EpisodeRatingAPIView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = RatingSerializer
+    
+    def get_ratingOn(self):
+        return Episode.objects.get(pk=self.kwargs.get('pk'))
+    
+    def get_object(self):
+        ratingOn = self.get_ratingOn()
+        user = self.request.user
+        return Rating.objects.filter(ratingOn=ratingOn).filter(createdBy=user).first()  
+    
+    def update_rating(self):
+        #episode의 totalRating 계산
+        ratingOn = self.get_ratingOn()
+        ratings = Rating.objects.filter(ratingOn=ratingOn)
+        totalRating = 0.0
+        for rating in ratings:
+            totalRating += rating.rating
+        
+        if ratings.count() != 0:
+            totalRating /= ratings.count()
+        else:
+            totalRating = 0
+        ratingOn.totalRating = totalRating
+        ratingOn.save()
+        
+        #webtoon의 totalRating 계산
+        webtoon = ratingOn.webtoon
+        episodes = Episode.objects.filter(webtoon=webtoon)
+        totalRating = 0.0
+        for episode in episodes:
+            totalRating += float(episode.totalRating)
+        
+        if episodes.count() != 0:
+            totalRating /= episodes.count()
+        else:
+            totalRating = 0
+        webtoon.totalRating = totalRating
+        webtoon.save()
+    
+    def perform_update(self, serializer):
+        createdBy = self.request.user
+        ratingOn = self.get_ratingOn()
+        serializer.save(createdBy=createdBy, ratingOn=ratingOn)
+        self.update_rating()
+    
+    def perform_destroy(self, serializer):
+        ratingOn = self.get_ratingOn()
+        user = self.request.user
+        Rating.objects.filter(ratingOn=ratingOn).filter(createdBy=user).first().delete()
+        self.update_rating()
+        
+
+class EpisodeLikeAPIView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = LikeSerializer
+    
+    def get_likeOn(self):
+        return Episode.objects.get(pk=self.kwargs.get('pk'))
+    
+    def get_object(self):
+        likeOn = self.get_likeOn()
+        user = self.request.user
+        return Like.objects.filter(episode=likeOn).filter(createdBy=user).first()
+
+    def update_like(self):
+        #episode의 총 like 수 계산
+        likeOn = self.get_likeOn()
+        likes = Like.objects.filter(episode=likeOn)
+        totalLikes = 0
+        totalDislikes = 0
+        
+        for like in likes:
+            if like.isLike:
+                totalLikes += 1
+            if like.isDislike:
+                totalDislikes += 1
+        
+        likeOn.likedBy = totalLikes
+        likeOn.dislikedBy = totalDislikes
+        likeOn.save()        
+    
+    def perform_update(self, serializer):
+        createdBy = self.request.user
+        likeOn = self.get_likeOn()
+        serializer.save(createdBy=createdBy, likeOn=likeOn)
+        self.update_like()
+    
+    def perform_destroy(self, serializer):
+        likeOn = self.get_likeOn()
+        user = self.request.user
+        Like.objects.filter(episode=likeOn).filter(createdBy=user).first().delete()
+        self.update_like()
+        
+
+class CommentLikeAPIView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = LikeSerializer
+    
+    def get_likeOn(self):
+        return Comment.objects.get(pk=self.kwargs.get('pk'))
+    
+    def get_object(self):
+        likeOn = self.get_likeOn()
+        user = self.request.user
+        return Like.objects.filter(comment=likeOn).filter(createdBy=user).first()
+
+    def update_like(self):
+        #comment의 총 like 수 계산
+        likeOn = self.get_likeOn()
+        likes = Like.objects.filter(comment=likeOn)
+        totalLikes = 0
+        totalDislikes = 0
+        
+        for like in likes:
+            if like.isLike:
+                totalLikes += 1
+            if like.isDislike:
+                totalDislikes += 1
+        
+        likeOn.likedBy = totalLikes
+        likeOn.dislikedBy = totalDislikes
+        likeOn.save()        
+    
+    def perform_update(self, serializer):
+        createdBy = self.request.user
+        likeOn = self.get_likeOn()
+        serializer.save(createdBy=createdBy, likeOn=likeOn)
+        self.update_like()
+    
+    def perform_destroy(self, serializer):
+        likeOn = self.get_likeOn()
+        user = self.request.user
+        Like.objects.filter(comment=likeOn).filter(createdBy=user).first().delete()
+        self.update_like()

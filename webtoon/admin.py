@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import UserProfile, DayOfWeek, Webtoon, Episode, Comment, Tag
+from .models import UserProfile, DayOfWeek, Webtoon, Episode, Comment, Tag, Rating, Like
 # Register your models here.
 
 
@@ -34,3 +34,5 @@ admin.site.register(Webtoon, WebtoonAdmin)
 admin.site.register(Episode)
 admin.site.register(Comment)
 admin.site.register(Tag)
+admin.site.register(Rating)
+admin.site.register(Like)

@@ -61,14 +61,17 @@ class Episode(models.Model):
     #thumbnail = models.ImageField()
     #content = models.ImageField()
 
-    rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
-    ratedBy = models.ManyToManyField(User, blank=True, related_name='ratedEpisodes')         # 별점을 매긴 사람 목록
+    totalRating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
     releasedDate = models.DateField(auto_now_add=True)
 
     webtoon = models.ForeignKey(Webtoon, on_delete=models.CASCADE, related_name='episodes')
-    likedBy = models.ManyToManyField(User, blank=True, related_name='likedEpisodes')         # 좋아요 남긴 사람 목록
 
     comments = GenericRelation('Comment', related_query_name='episode')
+    likes = GenericRelation('Like', related_query_name='episode')
+    
+    # 좋아요, 싫어요
+    likedBy = models.PositiveIntegerField(default=0)
+    dislikedBy = models.PositiveIntegerField(default=0)
 
     class Meta:
         unique_together = ['webtoon', 'episodeNumber']
@@ -76,7 +79,14 @@ class Episode(models.Model):
     def __str__(self):
         return str(self.episodeNumber) + '. ' + self.title
 
-        
+    def update_rating(self):
+        rating = 0.0
+        for episode in self.episodes.all():
+            rating += float(episode.rating)
+        if self.episodes.count() != 0:
+            rating /= self.episodes.count()
+        self.totalRating = rating
+        self.save()
 
 
 class Comment(models.Model):
@@ -94,9 +104,11 @@ class Comment(models.Model):
 
     comments = GenericRelation('Comment')                     # 본 댓글에 달린 대댓글들
 
+    likes = GenericRelation('Like', related_query_name='comment')
+
     # 좋아요, 싫어요
-    likedBy = models.ManyToManyField(User, blank=True, related_name='likedComments')
-    dislikedBy = models.ManyToManyField(User, blank=True, related_name='dislikedComments')
+    likedBy = models.PositiveIntegerField(default=0)
+    dislikedBy = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.content[:30]
@@ -110,3 +122,28 @@ class Tag(models.Model):
     def __str__(self):
         return self.content
     
+
+class Rating(models.Model):
+    """평점 모델"""
+    rating = models.PositiveIntegerField()
+    createdBy = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ratings')
+    ratingOn = models.ForeignKey(Episode, on_delete=models.CASCADE, related_name='ratings', blank=True, null=True)
+
+    class Meta:
+        unique_together = ['createdBy', 'ratingOn']
+
+
+class Like(models.Model):
+    """좋아요/싫어요 모델"""
+    isLike = models.BooleanField()
+    isDislike = models.BooleanField()
+    createdBy = models.ForeignKey(User, on_delete=models.CASCADE, related_name='likes')
+
+    # generic relationship 
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
+    object_id = models.PositiveIntegerField(null=True)
+    likeOn = GenericForeignKey()                           # 어떤 회차, 혹은 댓글에 대한 좋아요인지
+
+    class Meta:
+        unique_together = ['createdBy', 'content_type', 'object_id']
+                     
