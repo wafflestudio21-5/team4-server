@@ -14,11 +14,13 @@ from pathlib import Path
 from datetime import timedelta
 import os
 from dotenv import load_dotenv
+import pymysql
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 ROOT_DIR = BASE_DIR
 load_dotenv(os.path.join(BASE_DIR, '.env'))
+pymysql.install_as_MySQLdb()
 
 
 # Quick-start development settings - unsuitable for production
@@ -43,9 +45,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-    
+
     'user',
     'drf_yasg',
+
+    'webtoon',
+  
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
@@ -60,6 +65,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.kakao',
 
     'widget_tweaks',
+
+    'django_filters',
 ]
 
 SITE_ID = 1
@@ -101,8 +108,12 @@ WSGI_APPLICATION = 'Watoon.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv("DB_NAME"),
+        'USER': os.getenv("DB_USER"),
+        'PASSWORD': os.getenv("DB_PASSWORD"),
+        'HOST': os.getenv("DB_HOST"),
+        'PORT': os.getenv("DB_PORT"),
     }
 }
 
