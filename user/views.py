@@ -108,7 +108,7 @@ class CustomRegisterView(RegisterView):
 
 
 
-BASE_URL = 'http://localhost:8000/'
+BASE_URL = 'http://watoon-env1.eba-ytauqqvt.ap-northeast-2.elasticbeanstalk.com/'
 KAKAO_CALLBACK_URI = BASE_URL + 'accounts/kakao/callback/'
 GOOGLE_CALLBACK_URI = BASE_URL + 'accounts/google/callback/'
 
