@@ -158,7 +158,7 @@ AUTHENTICATION_BACKENDS = [
 
 # Email Settings
 LOGIN_URL = 'rest_login'
-ACCOUNT_SIGNUP_REDIRECT_URL = 'account-email-sent'
+ACCOUNT_SIGNUP_REDIRECT_URL = 'rest_resend_email'#'account-email-sent'
 ACCOUNT_LOGOUT_ON_GET = True
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"

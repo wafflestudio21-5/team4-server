@@ -1,13 +1,34 @@
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
-import requests
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
+from allauth.socialaccount.models import SocialAccount
+
+from django.utils.crypto import get_random_string
+
+from .models import User
+import requests
+import time
 
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
-    def save_user(self, request, sociallogin, form=None):
-        user = super().save_user(request, sociallogin, form)
-        oauth_data = sociallogin.account.extra_data
-        user.nickname = oauth_data.get("name")
-        return user
+    def pre_social_login(self, request, sociallogin):
+
+        # dic = sociallogin.account.extra_data
+        # print(dic)
+        # if sociallogin.user is None:
+        #     print("yes")
+        # else:
+        #     print("no")
+        
+        user = sociallogin.user
+        if user.nickname is not "":
+            return
+
+        nickname = time.strftime('%Y%m%d_%H%M%S')
+        for i in range(10):
+            nickname = user.nickname+get_random_string(length=12)
+            if not User.objects.filter(nickname=nickname).exists():
+                break
+        user.nickname = nickname
+        user.save()
 
 class CustomGoogleOAuth2Adapter(GoogleOAuth2Adapter):
     profile_url = "https://openidconnect.googleapis.com/v1/userinfo"

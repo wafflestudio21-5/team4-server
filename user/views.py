@@ -146,8 +146,8 @@ def kakao_callback(request):
     user_info_req_json = user_info_req.json()
     kakao_account = user_info_req_json.get('kakao_account')
     email = kakao_account.get('email')
-    nickname = kakao_account.get('profile').get('nickname')
-    print(email, nickname)
+    #nickname = kakao_account.get('profile').get('nickname')
+    #print(email, nickname)
     try:
         user = User.objects.get(email=email)
 
@@ -246,8 +246,7 @@ def google_callback(request):
 
     except User.DoesNotExist:    # DoesNotExist -> Django Model에서 기본 지원
         # 전달받은 이메일로 기존에 가입된 유저가 아예 없으면 => 새로 회원가입 & 해당 유저의 jwt 발급
-        data = {'access_token': access_token, 'code': code, 'nickname': 'testasdf'}
-        ## 여기다 data에 추가하고 싶은 사항(nickname) 포함하면 될듯
+        data = {'access_token': access_token, 'code': code}
 
         accept = requests.post(f"{BASE_URL}accounts/google/login/finish/", data=data)
         accept_status = accept.status_code
