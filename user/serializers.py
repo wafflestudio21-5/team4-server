@@ -41,7 +41,7 @@ class CustomRegisterSerializer(RegisterSerializer):
         user.nickname = self.data.get('nickname')
         user.save()
         return user
-
+        
     def validate_nickname(self, nickname):
         # Check for special characters in the nickname
         if not nickname.isalnum():
@@ -57,6 +57,7 @@ class CustomRegisterSerializer(RegisterSerializer):
 
         return nickname
     
+    
 class CustomPasswordResetConfirmSerializer(PasswordResetConfirmSerializer):
     def __init__(self, *args, **kwargs):
         # URL 매개변수를 가져와서 기본값 설정
@@ -65,7 +66,7 @@ class CustomPasswordResetConfirmSerializer(PasswordResetConfirmSerializer):
 
         data = {'uid': uid_param, 'token': token_param}
         data.update(kwargs.get('data', {}))
-
+        
         kwargs['data'] = data
 
         super().__init__(*args, **kwargs)
@@ -110,7 +111,7 @@ class UserSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(
             email = validated_data['email'],
             nickname = validated_data['nickname'],
-            password = validated_data['password']
+            password = validated_data['password'],
         )
         return user
 
