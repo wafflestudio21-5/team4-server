@@ -11,12 +11,16 @@ from .views import (WebtoonAPIView,
                     EpisodeListAPIView,
                     TagWebtoonAPIView,
                     EpisodeCommentAPIView,
+                    
                     # new views
                     SubCommentListAPIView,
                     UploadWebtoonListAPIView,
                     SubscribeWebtoonListAPIView,
                     WebtoonSearchView,
                     DayOfWeekCreateAPIView,
+                    EpisodeRatingAPIView, 
+                    EpisodeLikeAPIView, 
+                    CommentLikeAPIView, 
                     UserProfileAPIView,
                    )
 
@@ -40,6 +44,10 @@ urlpatterns = [
     path('api/profile/<int:pk>', UserProfileAPIView.as_view()),
     path('api/profile/<int:pk>/uploadWebtoonList', UploadWebtoonListAPIView.as_view()),
     path('api/profile/subscribeWebtoonList', SubscribeWebtoonListAPIView.as_view()),
+
+    path('api/episode/<int:pk>/rating', EpisodeRatingAPIView.as_view()), 
+    path('api/episode/<int:pk>/like', EpisodeLikeAPIView.as_view()), 
+    path('api/comment/<int:pk>/like', CommentLikeAPIView.as_view()), 
 
     # 임시 엔드포인트
     path('api/dayofweek', DayOfWeekCreateAPIView.as_view())

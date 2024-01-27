@@ -5,12 +5,13 @@ from django.core.validators import MaxLengthValidator, MinLengthValidator
 from user.models import User
 from rest_framework import serializers
 
-from .models import DayOfWeek, Webtoon, Episode, Comment, Tag, UserProfile
+from .models import DayOfWeek, Webtoon, Episode, Comment, Tag, Rating, Like, UserProfile
 from user.serializers import UserSerializer
+from rest_framework.exceptions import ValidationError
 
 
 # ///////////////////////////////////////////////////////////////////////////////
-# Serializer 작업 때 Image 관련 요소 모두 주석처리 하여 추후 Merge 때 확인 필요
+# Serializer 작업 때 Image 관련 요소 모두 제거 추후 수정 필요
 # ///////////////////////////////////////////////////////////////////////////////
 
 
@@ -33,6 +34,29 @@ class TagSerializer(serializers.ModelSerializer):
     #     return value
 
 
+class RatingSerializer(serializers.ModelSerializer):
+    """평점 Serializer"""
+    class Meta:
+        model = Rating
+        fields = ['rating', 'createdBy']
+        read_only_fields = ['createdBy']
+
+
+class LikeSerializer(serializers.ModelSerializer):
+    """좋아요/싫어요 Serializer"""
+    class Meta:
+        model = Like
+        fields = ['isLike', 'isDislike', 'createdBy']
+        read_only_fields = ['createdBy']
+    
+    def validate(self, data):
+        isLike = data['isLike']
+        isDislike = data['isDislike']
+        if (isLike and isDislike) or (not isLike and not isDislike):
+            raise ValidationError('Like (exclusive) or Dislike should be selected')
+        return data
+        
+
 class DayOfWeekSerializer(serializers.ModelSerializer):
     """요일 Serializer"""
     class Meta:
@@ -49,7 +73,6 @@ class WebtoonInfoSerializer(serializers.ModelSerializer):
     subscribing = serializers.SerializerMethodField(method_name='isSubscribing', read_only=True)
     class Meta:
         model = Webtoon
-        #fields = ['id', 'title', 'titleImage', 'releasedDate']
         fields = ['id', 'title', 'releasedDate', 'author', 'totalRating', 'subscribing']
         read_only_fields = ['releasedDate', 'author', 'totalRating', 'subscribing']
 
@@ -146,21 +169,23 @@ class EpisodeInfoSerializer(serializers.ModelSerializer):
     """Webtoon 페이지에서 보여지는 Episode의 Serializer"""
     class Meta:
         model = Episode
-        #fields = ['id', 'title', 'episodeNumber', 'thumbnail', 'rating', 'releasedDate']
-        fields = ['id', 'title', 'episodeNumber', 'rating', 'releasedDate']
-        read_only_fields = ['rating', 'releasedDate']
+        fields = ['id', 'title', 'episodeNumber', 'totalRating', 'releasedDate']
+        read_only_fields = ['totalRating', 'releasedDate']
 
 
 class EpisodeContentSerializer(serializers.ModelSerializer):
     """Episode 페이지 안에서의 Serializer"""
     webtoon = WebtoonInfoSerializer(read_only=True)
+
     previousEpisode = serializers.SerializerMethodField(method_name='getPreviousEpisode', read_only=True)
     nextEpisode = serializers.SerializerMethodField(method_name='getNextEpisode', read_only=True)
+
     class Meta:
         model = Episode
-        fields = ['id', 'title', 'episodeNumber', 'rating', 'releasedDate', 'webtoon', 'previousEpisode', 'nextEpisode']
+        fields = ['id', 'title', 'episodeNumber', 'totalRating', 'releasedDate', 'webtoon', 'previousEpisode', 'nextEpisode', 'likedBy', 'dislikedBy']
         #fields = ['id', 'title', 'episodeNumber', 'thumbnail', 'content', 'rating', 'releasedDate']
-        read_only_fields = ['rating', 'releasedDate', 'previousEpisode', 'nextEpisode']
+        read_only_fields = ['totalRating', 'releasedDate', 'previousEpisode', 'nextEpisode', 'likedBy', 'dislikedBy']
+
     
     def update(self, instance, validated_data):
         for key in validated_data:
@@ -239,14 +264,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
 #         read_only_fields = ['dtCreated', 'dtUpdated', 'createdBy']
 
 
+
 class CommentContentSerializer(serializers.ModelSerializer):
     """댓글 페이지 안에서의 Serializer"""
     # comments = CommentInfoSerializer(many=True, read_only=True)
     subComments = serializers.SerializerMethodField(method_name='getComments', read_only=True)
-    # likedBy = UserInfoSerializer(many=True)
-    likedBy = serializers.SerializerMethodField(method_name='getLikedBy', read_only=True)
-    # dislikedBy = UserInfoSerializer(many=True)
-    dislikedBy = serializers.SerializerMethodField(method_name='getDislikedBy', read_only=True)
     createdBy = UserInfoSerializer(read_only=True)
     class Meta:
         model = Comment
@@ -256,12 +278,7 @@ class CommentContentSerializer(serializers.ModelSerializer):
     def getComments(self, obj):
         return obj.comments.count()
 
-    def getLikedBy(self, obj):
-        return obj.likedBy.count()
 
-    def getDislikedBy(self, obj):
-        return obj.dislikedBy.count()
-    
 
     # def create(self, validated_data):
     #     instance = Comment()
@@ -312,4 +329,3 @@ class CommentContentSerializer(serializers.ModelSerializer):
     #
     # def validate(self, data):
     #     return data
-
