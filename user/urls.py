@@ -10,7 +10,7 @@ from dj_rest_auth.views import (
 from dj_rest_auth.registration.views import ResendEmailVerificationView
 from dj_rest_auth import urls
 
-from .views import CustomVerifyEmailView, CustomLoginView, CustomLogoutView, CustomRegisterView, KakaoLogin, GoogleLogin
+from .views import CustomVerifyEmailView, CustomLoginView, CustomLogoutView, CustomRegisterView, GoogleLogin, KakaoLogin
 from . import views
 
 urlpatterns = [

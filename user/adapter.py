@@ -9,26 +9,24 @@ import requests
 import time
 
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
-    def pre_social_login(self, request, sociallogin):
+    def save_user(self, request, sociallogin, form=None):
+        user = super().save_user(request, sociallogin, form)
+        user.nickname = request.POST.get("nickname")
 
-        # dic = sociallogin.account.extra_data
-        # print(dic)
-        # if sociallogin.user is None:
-        #     print("yes")
-        # else:
-        #     print("no")
-        
-        user = sociallogin.user
-        if user.nickname is not "":
-            return
+        if user.nickname is None:
+            user.nickname = ""
 
-        nickname = time.strftime('%Y%m%d_%H%M%S')
+        nickname = user.nickname
+
         for i in range(10):
-            nickname = user.nickname+get_random_string(length=12)
             if not User.objects.filter(nickname=nickname).exists():
                 break
+            nickname = user.nickname+get_random_string(length=12)
+
         user.nickname = nickname
+
         user.save()
+        return user
 
 class CustomGoogleOAuth2Adapter(GoogleOAuth2Adapter):
     profile_url = "https://openidconnect.googleapis.com/v1/userinfo"

@@ -1,19 +1,27 @@
 # from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.utils.encoding import force_str
+from django.db import IntegrityError
+from django.contrib.auth import get_user_model
+from django.http import HttpRequest, HttpResponseBadRequest
 
 from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from dj_rest_auth.registration.serializers import RegisterSerializer
+from dj_rest_auth.registration.serializers import RegisterSerializer, SocialLoginSerializer
 from dj_rest_auth.serializers import LoginSerializer, PasswordResetConfirmSerializer
 
 from allauth.account.adapter import get_adapter
 from allauth.account.utils import url_str_to_user_pk as uid_decoder
+from allauth.socialaccount.helpers import complete_social_login
+from allauth.account import app_settings as allauth_account_settings
+
 
 from .models import User
 import Watoon.settings as settings
+from requests.exceptions import HTTPError
+
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -114,5 +122,3 @@ class UserSerializer(serializers.ModelSerializer):
             password = validated_data['password'],
         )
         return user
-
-

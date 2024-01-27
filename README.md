@@ -13,6 +13,9 @@ team4-server에서 상단에 settings 탭 - Secrets and variables - Action에서
 + aws에서 미리 어플리케이션과 환경을 생성한 후, deploy 파일에 application_name과 environment_name을 자신의 것으로 맞춰 기재하기
 
 ## 소셜 로그인 관련
+api는 accounts/kakao/callback, accounts/google/callback
+보내야 하는 정보는 소셜로그인 api와의 통신을 통해 얻은 code, nickname(필수 x)
+
 ### 구글
 구글 api에서 웹 어플리케이션으로 등록, client id랑 secret 알아내서 github에 secret key로 등록시키기. 이후 workfile에 create .env file쪽에 관련 내용 추가 필요
 
