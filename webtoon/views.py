@@ -383,7 +383,7 @@ class EpisodeRatingAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = RatingSerializer
     
     def get_ratingOn(self):
-        return Episode.objects.get(pk=self.kwargs.get('pk'))
+        return get_object_or_404(Episode, pk=self.kwargs.get('pk'))
     
     def get_object(self):
         ratingOn = self.get_ratingOn()
