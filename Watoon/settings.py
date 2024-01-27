@@ -14,11 +14,13 @@ from pathlib import Path
 from datetime import timedelta
 import os
 from dotenv import load_dotenv
+import pymysql
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 ROOT_DIR = BASE_DIR
 load_dotenv(os.path.join(BASE_DIR, '.env'))
+pymysql.install_as_MySQLdb()
 
 
 # Quick-start development settings - unsuitable for production
@@ -60,7 +62,8 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google', # <- 필요한 소셜 로그인 추가
-    
+    'allauth.socialaccount.providers.kakao',
+
     'widget_tweaks',
 
     'django_filters',
@@ -72,7 +75,8 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
+    'user.middleware.DisableCSRF',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -105,8 +109,12 @@ WSGI_APPLICATION = 'Watoon.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv("DB_NAME"),
+        'USER': os.getenv("DB_USER"),
+        'PASSWORD': os.getenv("DB_PASSWORD"),
+        'HOST': os.getenv("DB_HOST"),
+        'PORT': os.getenv("DB_PORT"),
     }
 }
 
@@ -162,7 +170,7 @@ AUTHENTICATION_BACKENDS = [
 
 # Email Settings
 LOGIN_URL = 'rest_login'
-ACCOUNT_SIGNUP_REDIRECT_URL = 'account-email-sent'
+ACCOUNT_SIGNUP_REDIRECT_URL = 'rest_resend_email'#'account-email-sent'
 ACCOUNT_LOGOUT_ON_GET = True
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
@@ -254,3 +262,38 @@ ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = 'rest_verify_email'
 ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = 'rest_verify_email'
 ACCOUNT_EMAIL_SUBJECT_PREFIX = ""
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1
+
+
+
+#secret keys
+SOCIAL_AUTH_GOOGLE_CLIENT_ID = os.getenv("SOCIAL_AUTH_GOOGLE_CLIENT_ID")
+SOCIAL_AUTH_GOOGLE_CLIENT_SECRET = os.getenv("SOCIAL_AUTH_GOOGLE_CLIENT_SECRET")
+STATE = os.getenv("STATE")
+
+SOCIAL_AUTH_KAKAO_REST_API_KEY = os.getenv("SOCIAL_AUTH_KAKAO_REST_API_KEY")
+#SOCIAL_AUTH_KAKAO_CLIENT_SECRET = os.getenv("SOCIAL_AUTH_KAKAO_CLIENT_SECRET")
+
+
+#socialaccount
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        # For each OAuth based provider, either add a ``SocialApp``
+        # (``socialaccount`` app) containing the required client
+        # credentials, or list them here:
+        'APP': {
+            'client_id': os.getenv("SOCIAL_AUTH_GOOGLE_CLIENT_ID"),
+            'secret': os.getenv("SOCIAL_AUTH_GOOGLE_CLIENT_SECRET"),
+            'key': ''
+        }
+    },
+
+    'kakao': {
+        'APP': {
+            'client_id': os.getenv("SOCIAL_AUTH_KAKAO_REST_API_KEY"),
+            'secret': os.getenv("SOCIAL_AUTH_KAKAO_SECRET"),
+            'key': ''
+        }
+    }
+}
+
+SOCIALACCOUNT_ADAPTER = "user.adapter.CustomSocialAccountAdapter"

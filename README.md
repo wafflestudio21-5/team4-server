@@ -12,5 +12,22 @@ team4-server에서 상단에 settings 탭 - Secrets and variables - Action에서
 
 + aws에서 미리 어플리케이션과 환경을 생성한 후, deploy 파일에 application_name과 environment_name을 자신의 것으로 맞춰 기재하기
 
+## 소셜 로그인 관련
+### 구글
+구글 api에서 웹 어플리케이션으로 등록, client id랑 secret 알아내서 github에 secret key로 등록시키기. 이후 workfile에 create .env file쪽에 관련 내용 추가 필요
+
+추가로 "승인된 리디렉션 url"에 사이트/accounts/google/callback 추가해야 함
+
+프론트와 협업 관련 글
+https://velog.io/@hnnynh/OAuth-2.0과-Django의-구글-소셜로그인
+
+### 카카오
+https://velog.io/@yevini118/Django-allauth-카카오-로그인하기
+
+
++ 앱 아이콘 등록 후 비즈앱 전환 해야 이메일 얻기 가능
+
++ 테스트할때 자신의 컴퓨터 ip를 허용 ip에 놓기
++ 
 2024-01-12 View 1차 구현
  - user와 webtoon 앱의 migration이 각각 작동해서 실제 migration 하실 때 user것 먼저, 그 다음에 webtoon 것으로 해야 할 것 같습니다. 이유는 잘 모르겠지만 추후 수정하겠습니다. 
