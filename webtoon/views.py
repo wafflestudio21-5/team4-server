@@ -25,13 +25,15 @@ from .serializers import (WebtoonContentSerializer,
                           EpisodeContentSerializer,
                           # CommentInfoSerializer,
                           CommentContentSerializer,
-                          DayOfWeekSerializer
+                          DayOfWeekSerializer,
+                          UserProfileSerializer
                           )
 from .permissions import (IsAuthorOrReadOnly,
                           IsWebtoonAuthorOrReadOnly,
                           IsEpisodeAuthorOrReadOnly,
                           IsEpisodeWebtoonAuthorOrReadOnly,
                           IsCommentAuthorOrReadOnly,
+                          IsProfileUserOrReadOnly,
                           )
 from .validators import isDayName
 from .paginations import (CommentCursorPagination,
@@ -372,3 +374,13 @@ class WebtoonSearchView(generics.ListAPIView):
 
 class DayOfWeekCreateAPIView(generics.CreateAPIView):
     serializer_class = DayOfWeekSerializer
+
+
+class UserProfileAPIView(generics.RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticatedOrReadOnly, IsProfileUserOrReadOnly]
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer
+
+    def get_object(self):
+        user = self.kwargs.get('pk')
+        return get_object_or_404(UserProfile, user=user)
