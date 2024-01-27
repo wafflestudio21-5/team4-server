@@ -108,7 +108,7 @@ class CustomRegisterView(RegisterView):
 
 
 
-BASE_URL = 'http://watoon-env1.eba-ytauqqvt.ap-northeast-2.elasticbeanstalk.com/'
+BASE_URL = 'http://127.0.0.1:8000/'
 KAKAO_CALLBACK_URI = BASE_URL + 'accounts/kakao/callback/'
 GOOGLE_CALLBACK_URI = BASE_URL + 'accounts/google/callback/'
 
@@ -267,7 +267,7 @@ class GoogleLogin(SocialLoginView):
     adapter_class = CustomGoogleOAuth2Adapter
     callback_url = GOOGLE_CALLBACK_URI
     client_class = OAuth2Client
-
+    
 
 def NickNameVerify(request, nickname):
     user = User.objects.get(nickname=nickname)
