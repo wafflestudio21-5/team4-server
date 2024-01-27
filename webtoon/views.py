@@ -27,13 +27,15 @@ from .serializers import (WebtoonContentSerializer,
                           CommentContentSerializer,
                           DayOfWeekSerializer, 
                           RatingSerializer, 
-                          LikeSerializer
+                          LikeSerializer,
+                          UserProfileSerializer,
                           )
 from .permissions import (IsAuthorOrReadOnly,
                           IsWebtoonAuthorOrReadOnly,
                           IsEpisodeAuthorOrReadOnly,
                           IsEpisodeWebtoonAuthorOrReadOnly,
                           IsCommentAuthorOrReadOnly,
+                          IsProfileUserOrReadOnly,
                           )
 from .validators import isDayName
 from .paginations import (CommentCursorPagination,
@@ -512,3 +514,13 @@ class CommentLikeAPIView(generics.RetrieveUpdateDestroyAPIView):
         user = self.request.user
         Like.objects.filter(comment=likeOn).filter(createdBy=user).first().delete()
         self.update_like()
+
+
+class UserProfileAPIView(generics.RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticatedOrReadOnly, IsProfileUserOrReadOnly]
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer
+
+    def get_object(self):
+        user = self.kwargs.get('pk')
+        return get_object_or_404(UserProfile, user=user)

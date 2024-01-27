@@ -5,7 +5,7 @@ from django.core.validators import MaxLengthValidator, MinLengthValidator
 from user.models import User
 from rest_framework import serializers
 
-from .models import DayOfWeek, Webtoon, Episode, Comment, Tag, Rating, Like
+from .models import DayOfWeek, Webtoon, Episode, Comment, Tag, Rating, Like, UserProfile
 from user.serializers import UserSerializer
 from rest_framework.exceptions import ValidationError
 
@@ -234,14 +234,24 @@ class UserInfoSerializer(serializers.ModelSerializer):
         return value
 
 
-class UserContentSerializer(serializers.ModelSerializer):
+class UserProfileSerializer(serializers.ModelSerializer):
     """유저 Serializer"""
-    webtoons = WebtoonInfoSerializer(many=True)
-    subscribingWebtoons = WebtoonInfoSerializer(many=True)
-    subscribers = SubscriberUserSerializer(many=True)
+    id = serializers.SerializerMethodField(method_name='getUserId', read_only=True)
+    nickname = serializers.SerializerMethodField(method_name='getNickname', read_only=True)
+    subscriberNumber = serializers.SerializerMethodField(method_name='getSubscriberNumber', read_only=True)
     class Meta:
-        model = User
-        fields = ['id', 'nickname', 'isAuther', 'webtoons', 'subscribingWebtoons', 'subscribers']
+        model = UserProfile
+        fields = ['id', 'nickname', 'introduction', 'isAuthor', 'subscriberNumber']
+        read_only_fields = ['id', 'nickname', 'subscriberNumber']
+
+    def getUserId(self, obj):
+        return obj.user.id
+
+    def getNickname(self, obj):
+        return obj.user.nickname
+
+    def getSubscriberNumber(self, obj):
+        return obj.subscribers.count()
 
 
 
