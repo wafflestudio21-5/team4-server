@@ -297,3 +297,9 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 SOCIALACCOUNT_ADAPTER = "user.adapter.CustomSocialAccountAdapter"
+
+#S3 Image Uploader 
+S3_ACCESS_KEY_ID = os.getenv("S3_ACCESS_KEY_ID ")
+S3_SECRET_ACCESS_KEY = os.getenv("S3_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = 'watoon-bucket'
+AWS_S3_REGION_NAME = 'ap-northeast-2'

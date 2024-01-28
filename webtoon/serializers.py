@@ -50,7 +50,7 @@ class WebtoonInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Webtoon
         #fields = ['id', 'title', 'titleImage', 'releasedDate']
-        fields = ['id', 'title', 'releasedDate', 'author', 'totalRating', 'subscribing']
+        fields = ['id', 'title', 'releasedDate', 'author', 'totalRating', 'subscribing', 'titleImage']
         read_only_fields = ['releasedDate', 'author', 'totalRating', 'subscribing']
 
     def isSubscribing(self, obj):
@@ -58,6 +58,7 @@ class WebtoonInfoSerializer(serializers.ModelSerializer):
         if not user.is_authenticated:
             return False
         return obj.subscribers.filter(pk=user.pk).exists()
+
 
 
 class WebtoonContentSerializer(serializers.ModelSerializer):
@@ -98,7 +99,8 @@ class WebtoonContentSerializer(serializers.ModelSerializer):
         #     tag.webtoons.add(webtoon)
         # for day in uploadDays:
         #     day.webtoons.add(webtoon)
-
+            
+        webtoon.titleImage = validated_data["titleImage"]
         return webtoon
 
     def update(self, instance, validated_data):
