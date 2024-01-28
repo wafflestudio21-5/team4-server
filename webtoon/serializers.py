@@ -7,8 +7,7 @@ from rest_framework import serializers
 
 from .models import DayOfWeek, Webtoon, Episode, Comment, Tag
 from user.serializers import UserSerializer
-import os
-
+from Watoon import settings
 # ///////////////////////////////////////////////////////////////////////////////
 # Serializer 작업 때 Image 관련 요소 모두 주석처리 하여 추후 Merge 때 확인 필요
 # ///////////////////////////////////////////////////////////////////////////////
@@ -194,7 +193,7 @@ class EpisodeContentSerializer(serializers.ModelSerializer):
         return None
     
     def getImageUrl(self, obj):
-        return os.getenv("S3_URL") + "/img/" + str(obj.webtoon.id) + "/" + str(obj.episodeNumber)
+        return settings.S3_URL + "/img/" + str(obj.webtoon.id) + "/" + str(obj.episodeNumber)
     
 
 class SubscriberUserSerializer(serializers.ModelSerializer):
