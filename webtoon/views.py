@@ -85,12 +85,20 @@ class WebtoonAPIView(RetrieveUpdateDestroyAPIView):
                 tag.delete()
         super().perform_destroy(instance)
 
+    def destroy(self, request, *args, **kwargs):
+        super().destroy(request, *args, **kwargs)
+        return Response(status=200)
+
 
 # Episode 하나하나를 보여주는 View
 class EpisodeAPIView(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly, IsEpisodeAuthorOrReadOnly,)
     queryset = Episode.objects.all()
     serializer_class = EpisodeContentSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        super().destroy(request, *args, **kwargs)
+        return Response(status=200)
 
 
 class SubCommentListAPIView(generics.ListCreateAPIView):
