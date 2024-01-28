@@ -6,6 +6,11 @@ class CommentCursorPagination(CursorPagination):
     page_size = 15
 
 
+class SubCommentCursorPagination(CursorPagination):
+    ordering = 'dtCreated'
+    page_size = 15
+
+
 class PaginationHandlerMixin(object):
     @property
     def paginator(self):

@@ -39,6 +39,7 @@ from .permissions import (IsAuthorOrReadOnly,
                           )
 from .validators import isDayName
 from .paginations import (CommentCursorPagination,
+                          SubCommentCursorPagination,
                           WebtoonCursorPagination,
                           PaginationHandlerMixin,
                           EpisodeCursorPagination,
@@ -124,7 +125,7 @@ class EpisodeAPIView(RetrieveUpdateDestroyAPIView):
 class SubCommentListAPIView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = CommentContentSerializer
-    pagination_class = CommentCursorPagination
+    pagination_class = SubCommentCursorPagination
 
     def get_comment(self):
         """상위 댓글 가져오기"""
