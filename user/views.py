@@ -2,20 +2,16 @@ from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.debug import sensitive_post_parameters
-from django.contrib.auth import login
 
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view
 
 from dj_rest_auth.registration.views import VerifyEmailView, RegisterView, SocialLoginView
 from dj_rest_auth.views import LoginView, LogoutView, PasswordResetConfirmView
-from dj_rest_auth.serializers import JWTSerializer
 
 from allauth.account.forms import default_token_generator
 from allauth.account.views import login as allauth_login
@@ -115,7 +111,8 @@ class CustomRegisterView(RegisterView):
 
 
 
-BASE_URL = 'http://127.0.0.1:8000/'
+#BASE_URL = 'http://127.0.0.1:8000/'
+BASE_URL = 'http://watoon-env1.eba-ytauqqvt.ap-northeast-2.elasticbeanstalk.com/'
 KAKAO_CALLBACK_URI = BASE_URL + 'accounts/kakao/callback/'
 GOOGLE_CALLBACK_URI = BASE_URL + 'accounts/google/callback/'
 
