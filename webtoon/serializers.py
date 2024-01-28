@@ -290,7 +290,7 @@ class CommentContentSerializer(serializers.ModelSerializer):
     subComments = serializers.SerializerMethodField(method_name='getComments', read_only=True)
     createdBy = UserInfoSerializer(read_only=True)
     liking = serializers.SerializerMethodField(method_name='isLiking', read_only=True)
-    disiking = serializers.SerializerMethodField(method_name='isDisliking', read_only=True)
+    disliking = serializers.SerializerMethodField(method_name='isDisliking', read_only=True)
 
     class Meta:
         model = Comment
