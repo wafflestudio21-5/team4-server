@@ -70,7 +70,7 @@ class WebtoonContentSerializer(serializers.ModelSerializer):
     episodeCount = serializers.SerializerMethodField(method_name='getEpisodeCount', read_only=True)
     class Meta:
         model = Webtoon
-        fields = ['id', 'title', 'description', 'uploadDays', 'author', 'totalRating', 'episodeCount', 'isFinished', 'tags', 'subscribing', 'subscribeCount']
+        fields = ['id', 'title', 'description', 'uploadDays', 'author', 'totalRating', 'episodeCount', 'isFinished', 'tags', 'subscribing', 'subscribeCount',  'titleImage']
         #fields = ['id', 'title', 'titleImage', 'description', 'uploadDays', 'author', 'totalRating', 'tags']
         read_only_fields = ['author', 'releasedDate', 'subscribing', 'subscribeCount', 'totalRating', 'episodeCount']
        
@@ -98,8 +98,10 @@ class WebtoonContentSerializer(serializers.ModelSerializer):
         #     tag.webtoons.add(webtoon)
         # for day in uploadDays:
         #     day.webtoons.add(webtoon)
-            
-        webtoon.titleImage = validated_data["titleImage"]
+        
+        if "titleImage" in validated_data:
+            webtoon.titleImage = validated_data["titleImage"]
+        
         return webtoon
 
     def update(self, instance, validated_data):
