@@ -40,6 +40,7 @@ from .paginations import (CommentCursorPagination,
                           EpisodeCursorPagination,
                           )
 
+from imageUploader import S3ImageUploader
 
 def annotateLatestUploadDate(queryset):
     """Webtoon queryset을 가장 최근 에피소드 업로드 순으로 정렬"""
@@ -76,6 +77,7 @@ class WebtoonAPIView(RetrieveUpdateDestroyAPIView):
             for day in serializer.validated_data.get('uploadDays'):
                 if not isDayName(day.get('name')):
                     raise Http404("Day name not found")
+
         return super().perform_update(serializer)
 
     def perform_destroy(self, instance):
@@ -83,11 +85,24 @@ class WebtoonAPIView(RetrieveUpdateDestroyAPIView):
         for tag in webtoon.tags.all():
             if tag.webtoons.count() == 1:
                 tag.delete()
+
+        #TODO : titleImage 삭제 기능 구현 필요
+        
         super().perform_destroy(instance)
 
     def destroy(self, request, *args, **kwargs):
         super().destroy(request, *args, **kwargs)
         return Response(status=200)
+    
+    def update(self, request, *args, **kwargs):
+        image = request.FILES['titleImage']
+        try :
+            url = S3ImageUploader(image, request.data['title']).upload()
+        except:
+            return Response({"error" : "Wrong Image Request"}, status=400)
+        kwargs += {"titleImage" : url}
+        
+        return super().update(request, *args, **kwargs)
 
 
 # Episode 하나하나를 보여주는 View
@@ -189,7 +204,14 @@ class WebtoonListAPIView(APIView, PaginationHandlerMixin):
         if "tags" not in request.data :
             request.data['tags'] = []
 
-        kwargs = {'context': self.get_serializer_context()}
+        image = request.FILES['titleImage']
+        try :
+            url = S3ImageUploader(image, request.data['title']).upload()
+        except:
+            return Response({"error" : "Wrong Image Request"}, status=400)
+        
+        kwargs = {'context': self.get_serializer_context(),
+                  'titleImage' : url}
 
         serializer = WebtoonContentSerializer (data = request.data, **kwargs)
         if serializer.is_valid(raise_exception=True):
