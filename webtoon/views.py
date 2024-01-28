@@ -211,7 +211,7 @@ class WebtoonListAPIView(APIView, PaginationHandlerMixin):
 
         kwargs = {'context': self.get_serializer_context()}
                   
-        if "titleImage" in request.FiLES:
+        if "titleImage" in request.FILES:
             image = request.FILES['titleImage']
             try :
                 url = S3ImageUploader(image, request.FILES['title']).upload()
