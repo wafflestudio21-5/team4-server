@@ -32,7 +32,7 @@ class DayOfWeek(models.Model):
 class Webtoon(models.Model):
     """웹툰 모델"""
     title = models.CharField(max_length=50)
-    #titleImage = models.ImageField()
+    titleImage = models.CharField(max_length=50, null=True)
     description = models.CharField(max_length=200)
     isFinished = models.BooleanField(default=False)
     totalRating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
@@ -52,7 +52,7 @@ class Episode(models.Model):
     """회차 모델"""
     title = models.CharField(max_length=50)
     episodeNumber = models.IntegerField()                                # 회차 번호
-    #thumbnail = models.ImageField()
+    #thumbnail = models.CharField(max_length=50)
     #content = models.ImageField()
 
     totalRating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
@@ -71,6 +71,7 @@ class Episode(models.Model):
 
     def __str__(self):
         return str(self.episodeNumber) + '. ' + self.title
+
 
 
 

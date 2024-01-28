@@ -7,7 +7,10 @@ from rest_framework import serializers
 
 from .models import DayOfWeek, Webtoon, Episode, Comment, Tag, Rating, Like, UserProfile
 from user.serializers import UserSerializer
+
 from rest_framework.exceptions import ValidationError
+from Watoon import settings
+
 
 
 # ///////////////////////////////////////////////////////////////////////////////
@@ -73,7 +76,7 @@ class WebtoonInfoSerializer(serializers.ModelSerializer):
     subscribing = serializers.SerializerMethodField(method_name='isSubscribing', read_only=True)
     class Meta:
         model = Webtoon
-        fields = ['id', 'title', 'releasedDate', 'author', 'totalRating', 'subscribing']
+        fields = ['id', 'title', 'releasedDate', 'author', 'totalRating', 'subscribing', 'titleImage']
         read_only_fields = ['releasedDate', 'author', 'totalRating', 'subscribing']
 
     def isSubscribing(self, obj):
@@ -81,6 +84,7 @@ class WebtoonInfoSerializer(serializers.ModelSerializer):
         if not user.is_authenticated:
             return False
         return obj.subscribers.filter(pk=user.pk).exists()
+
 
 
 class WebtoonContentSerializer(serializers.ModelSerializer):
@@ -121,7 +125,8 @@ class WebtoonContentSerializer(serializers.ModelSerializer):
         #     tag.webtoons.add(webtoon)
         # for day in uploadDays:
         #     day.webtoons.add(webtoon)
-
+            
+        webtoon.titleImage = validated_data["titleImage"]
         return webtoon
 
     def update(self, instance, validated_data):
@@ -180,11 +185,11 @@ class EpisodeContentSerializer(serializers.ModelSerializer):
     previousEpisode = serializers.SerializerMethodField(method_name='getPreviousEpisode', read_only=True)
     nextEpisode = serializers.SerializerMethodField(method_name='getNextEpisode', read_only=True)
     liking = serializers.SerializerMethodField(method_name='isLiking', read_only=True)
-
+    imageUrl = serializers.SerializerMethodField(method_name='getImageUrl', read_only=True)
     class Meta:
         model = Episode
-        fields = ['id', 'title', 'episodeNumber', 'totalRating', 'releasedDate', 'webtoon', 'previousEpisode', 'nextEpisode', 'liking', 'likedBy']
-        #fields = ['id', 'title', 'episodeNumber', 'thumbnail', 'content', 'rating', 'releasedDate']
+        fields = ['id', 'title', 'episodeNumber', 'totalRating', 'releasedDate', 'webtoon', 'previousEpisode', 'nextEpisode', 'liking', 'likedBy', 'imageUrl']
+        
         read_only_fields = ['totalRating', 'releasedDate', 'previousEpisode', 'nextEpisode', 'liking', 'likedBy']
 
     
@@ -216,11 +221,17 @@ class EpisodeContentSerializer(serializers.ModelSerializer):
             return nextEpisode[0].id
         return None
     
+
     def isLiking(self, obj):
         user = self.context.get('request').user
         if not user.is_authenticated:
             return False
         return Like.objects.filter(createdBy=user).filter(episode=obj).exists()
+
+    def getImageUrl(self, obj):
+        return settings.S3_URL + "/img/" + str(obj.webtoon.id) + "/" + str(obj.episodeNumber)
+    
+
 
 class SubscriberUserSerializer(serializers.ModelSerializer):
     """Subscriber를 보여주기 위한 Nested Serializer 용도로 사용"""

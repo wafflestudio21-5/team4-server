@@ -36,6 +36,9 @@ sensitive_post_parameters_m = method_decorator(
     ),
 )
 
+class TokenException(Exception):
+    pass
+
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
@@ -45,34 +48,18 @@ class CustomPasswordResetConfirmView(PasswordResetConfirmView):
     permission_classes = (AllowAny,)
     throttle_scope = 'dj_rest_auth'
 
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data, context={'request': request})
+    @sensitive_post_parameters_m
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def post(self, request, uid, token, *args, **kwargs):
+        context = {'uid': uid, 'token': token}
+        serializer = CustomPasswordResetConfirmSerializer(data=request.data, context=context)
         serializer.is_valid(raise_exception=True)
-        # Manually handle the logic to save the data
-        self.perform_password_reset(serializer.validated_data)
-
-        return Response({'detail': _('Password has been reset with the new password.')})
-
-    def perform_password_reset(self, validated_data):
-        # Extract necessary data and perform password reset logic here
-        uid = validated_data['uid']
-        token = validated_data['token']
-        new_password = validated_data['new_password1']
-
-        # Add your logic here to reset the password using the extracted data
-        # For example, you can use the UserModel to retrieve the user and update the password
-        try:
-            user = User._default_manager.get(pk=uid)
-        except User.DoesNotExist:
-            raise ValidationError({'uid': [_('Invalid value')]})
-
-        if not default_token_generator.check_token(user, token):
-            raise ValidationError({'token': [_('Invalid value')]})
-
-        # Your password reset logic here, for example:
-        user.set_password(new_password)
-        user.save()
-
+        serializer.save()
+        return Response(
+            {'detail': _('Password has been reset with the new password.')},
+        )
 
 class CustomVerifyEmailView(VerifyEmailView):
     def get(self, request, *args, **kwargs):
@@ -108,6 +95,7 @@ class CustomRegisterView(RegisterView):
 
 
 
+#BASE_URL = 'http://127.0.0.1:8000/'
 BASE_URL = 'http://watoon-env1.eba-ytauqqvt.ap-northeast-2.elasticbeanstalk.com/'
 KAKAO_CALLBACK_URI = BASE_URL + 'accounts/kakao/callback/'
 GOOGLE_CALLBACK_URI = BASE_URL + 'accounts/google/callback/'
@@ -148,6 +136,8 @@ def kakao_callback(request):
     email = kakao_account.get('email')
     #nickname = kakao_account.get('profile').get('nickname')
     #print(email, nickname)
+    user = None
+
     try:
         user = User.objects.get(email=email)
 
@@ -164,11 +154,13 @@ def kakao_callback(request):
             return JsonResponse({'err_msg': 'failed to signin'}, status=accept_status)
 
         accept_json = accept.json()
-        accept_json.pop('user', None)
+        if accept_json['user'] is not None:
+            accept_json['user']['nickname'] = user.nickname
         return JsonResponse(accept_json)
 
     except User.DoesNotExist:
-        data = {'access_token': access_token, 'code': auth_code}
+        nickname = request.GET.get("nickname")
+        data = {'access_token': access_token, 'code': auth_code, 'nickname': nickname}
         
         accept = requests.post(f"{BASE_URL}accounts/kakao/login/finish/", data=data)
         accept_status = accept.status_code
@@ -177,9 +169,11 @@ def kakao_callback(request):
             return JsonResponse({'err_msg': 'failed to signup'}, status=accept_status)
 
         accept_json = accept.json()
-        accept_json.pop('user', None)
+        if accept_json['user'] is not None:
+            user = User.objects.get(email=accept_json['user']['email'])
+            accept_json['user']['nickname'] = user.nickname
         return JsonResponse(accept_json)
-
+    
     except SocialAccount.DoesNotExist:
         return JsonResponse({'err_msg': 'email exists but not social user'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -241,12 +235,14 @@ def google_callback(request):
             return JsonResponse({'err_msg': 'failed to signin'}, status=accept_status)
 
         accept_json = accept.json()
-        accept_json.pop('user', None)
+        if accept_json['user'] is not None:
+            accept_json['user']['nickname'] = user.nickname
         return JsonResponse(accept_json)
 
     except User.DoesNotExist:    # DoesNotExist -> Django Model에서 기본 지원
         # 전달받은 이메일로 기존에 가입된 유저가 아예 없으면 => 새로 회원가입 & 해당 유저의 jwt 발급
-        data = {'access_token': access_token, 'code': code}
+        nickname = request.GET.get("nickname")
+        data = {'access_token': access_token, 'code': code, 'nickname': nickname}
 
         accept = requests.post(f"{BASE_URL}accounts/google/login/finish/", data=data)
         accept_status = accept.status_code
@@ -256,7 +252,9 @@ def google_callback(request):
             return JsonResponse({'err_msg': 'failed to signup'}, status=accept_status)
 
         accept_json = accept.json()
-        accept_json.pop('user', None)
+        if accept_json['user'] is not None:
+            user = User.objects.get(email=accept_json['user']['email'])
+            accept_json['user']['nickname'] = user.nickname
         return JsonResponse(accept_json)
 
     except SocialAccount.DoesNotExist:
@@ -264,10 +262,11 @@ def google_callback(request):
         return JsonResponse({'err_msg': 'email exists but not social user'}, status=status.HTTP_400_BAD_REQUEST)
 
 class GoogleLogin(SocialLoginView):
+    permission_classes = (IsNotAuthenticated,)
     adapter_class = CustomGoogleOAuth2Adapter
     callback_url = GOOGLE_CALLBACK_URI
     client_class = OAuth2Client
-
+    
 
 def NickNameVerify(request, nickname):
     user = User.objects.get(nickname=nickname)
