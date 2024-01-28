@@ -7,8 +7,7 @@ from rest_framework import serializers
 
 from .models import DayOfWeek, Webtoon, Episode, Comment, Tag
 from user.serializers import UserSerializer
-
-
+from Watoon import settings
 # ///////////////////////////////////////////////////////////////////////////////
 # Serializer 작업 때 Image 관련 요소 모두 주석처리 하여 추후 Merge 때 확인 필요
 # ///////////////////////////////////////////////////////////////////////////////
@@ -50,7 +49,7 @@ class WebtoonInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Webtoon
         #fields = ['id', 'title', 'titleImage', 'releasedDate']
-        fields = ['id', 'title', 'releasedDate', 'author', 'totalRating', 'subscribing']
+        fields = ['id', 'title', 'releasedDate', 'author', 'totalRating', 'subscribing', 'titleImage']
         read_only_fields = ['releasedDate', 'author', 'totalRating', 'subscribing']
 
     def isSubscribing(self, obj):
@@ -58,6 +57,7 @@ class WebtoonInfoSerializer(serializers.ModelSerializer):
         if not user.is_authenticated:
             return False
         return obj.subscribers.filter(pk=user.pk).exists()
+
 
 
 class WebtoonContentSerializer(serializers.ModelSerializer):
@@ -98,7 +98,8 @@ class WebtoonContentSerializer(serializers.ModelSerializer):
         #     tag.webtoons.add(webtoon)
         # for day in uploadDays:
         #     day.webtoons.add(webtoon)
-
+            
+        webtoon.titleImage = validated_data["titleImage"]
         return webtoon
 
     def update(self, instance, validated_data):
@@ -156,6 +157,7 @@ class EpisodeContentSerializer(serializers.ModelSerializer):
     webtoon = WebtoonInfoSerializer(read_only=True)
     previousEpisode = serializers.SerializerMethodField(method_name='getPreviousEpisode', read_only=True)
     nextEpisode = serializers.SerializerMethodField(method_name='getNextEpisode', read_only=True)
+    imageUrl = serializers.SerializerMethodField(method_name='getImageUrl', read_only=True)
     class Meta:
         model = Episode
         fields = ['id', 'title', 'episodeNumber', 'rating', 'releasedDate', 'webtoon', 'previousEpisode', 'nextEpisode']
@@ -189,6 +191,9 @@ class EpisodeContentSerializer(serializers.ModelSerializer):
         if nextEpisode.exists():
             return nextEpisode[0].id
         return None
+    
+    def getImageUrl(self, obj):
+        return settings.S3_URL + "/img/" + str(obj.webtoon.id) + "/" + str(obj.episodeNumber)
     
 
 class SubscriberUserSerializer(serializers.ModelSerializer):
