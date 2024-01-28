@@ -179,12 +179,13 @@ class EpisodeContentSerializer(serializers.ModelSerializer):
 
     previousEpisode = serializers.SerializerMethodField(method_name='getPreviousEpisode', read_only=True)
     nextEpisode = serializers.SerializerMethodField(method_name='getNextEpisode', read_only=True)
+    liking = serializers.SerializerMethodField(method_name='isLiking', read_only=True)
 
     class Meta:
         model = Episode
-        fields = ['id', 'title', 'episodeNumber', 'totalRating', 'releasedDate', 'webtoon', 'previousEpisode', 'nextEpisode', 'likedBy', 'dislikedBy']
+        fields = ['id', 'title', 'episodeNumber', 'totalRating', 'releasedDate', 'webtoon', 'previousEpisode', 'nextEpisode', 'liking', 'likedBy']
         #fields = ['id', 'title', 'episodeNumber', 'thumbnail', 'content', 'rating', 'releasedDate']
-        read_only_fields = ['totalRating', 'releasedDate', 'previousEpisode', 'nextEpisode', 'likedBy', 'dislikedBy']
+        read_only_fields = ['totalRating', 'releasedDate', 'previousEpisode', 'nextEpisode', 'liking', 'likedBy']
 
     
     def update(self, instance, validated_data):
@@ -215,6 +216,11 @@ class EpisodeContentSerializer(serializers.ModelSerializer):
             return nextEpisode[0].id
         return None
     
+    def isLiking(self, obj):
+        user = self.context.get('request').user
+        if not user.is_authenticated:
+            return False
+        return Like.objects.filter(createdBy=user).filter(episode=obj).exists()
 
 class SubscriberUserSerializer(serializers.ModelSerializer):
     """Subscriber를 보여주기 위한 Nested Serializer 용도로 사용"""

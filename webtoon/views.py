@@ -428,13 +428,19 @@ class EpisodeRatingAPIView(generics.RetrieveUpdateDestroyAPIView):
     def perform_destroy(self, serializer):
         ratingOn = self.get_ratingOn()
         user = self.request.user
-        Rating.objects.filter(ratingOn=ratingOn).filter(createdBy=user).first().delete()
+        try:
+            Rating.objects.filter(ratingOn=ratingOn).filter(createdBy=user).first().delete()
+        except:
+            raise Http404("Rating object does not exist")
         self.update_rating()
+    
+    def delete(self, request, pk):
+        super().delete(request, pk)
+        return Response(status=status.HTTP_200_OK)
         
 
-class EpisodeLikeAPIView(generics.RetrieveUpdateDestroyAPIView):
+class EpisodeLikeAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = LikeSerializer
     
     def get_likeOn(self):
         return Episode.objects.get(pk=self.kwargs.get('pk'))
@@ -443,35 +449,32 @@ class EpisodeLikeAPIView(generics.RetrieveUpdateDestroyAPIView):
         likeOn = self.get_likeOn()
         user = self.request.user
         return Like.objects.filter(episode=likeOn).filter(createdBy=user).first()
-
+    
     def update_like(self):
         #episode의 총 like 수 계산
         likeOn = self.get_likeOn()
         likes = Like.objects.filter(episode=likeOn)
         totalLikes = 0
-        totalDislikes = 0
         
         for like in likes:
             if like.isLike:
                 totalLikes += 1
-            if like.isDislike:
-                totalDislikes += 1
         
         likeOn.likedBy = totalLikes
-        likeOn.dislikedBy = totalDislikes
         likeOn.save()        
-    
-    def perform_update(self, serializer):
-        createdBy = self.request.user
+        
+    def post(self, request, pk):
+        createdBy = request.user
         likeOn = self.get_likeOn()
-        serializer.save(createdBy=createdBy, likeOn=likeOn)
+        if Like.objects.filter(createdBy=createdBy).filter(episode=likeOn).exists():
+            Like.objects.filter(createdBy=createdBy).filter(episode=likeOn).first().delete()
+        else:
+            like = Like.objects.create(createdBy=createdBy, isLike=True, isDislike=False)
+            like.likeOn = likeOn
+            like.save()
+            
         self.update_like()
-    
-    def perform_destroy(self, serializer):
-        likeOn = self.get_likeOn()
-        user = self.request.user
-        Like.objects.filter(episode=likeOn).filter(createdBy=user).first().delete()
-        self.update_like()
+        return Response(status=status.HTTP_200_OK)
         
 
 class CommentLikeAPIView(generics.RetrieveUpdateDestroyAPIView):
@@ -512,8 +515,15 @@ class CommentLikeAPIView(generics.RetrieveUpdateDestroyAPIView):
     def perform_destroy(self, serializer):
         likeOn = self.get_likeOn()
         user = self.request.user
-        Like.objects.filter(comment=likeOn).filter(createdBy=user).first().delete()
+        try:
+            Like.objects.filter(comment=likeOn).filter(createdBy=user).first().delete()
+        except:
+            raise Http404("Like object does not exist")
         self.update_like()
+    
+    def delete(self, request, pk):
+        super().delete(request, pk)
+        return Response(status=status.HTTP_200_OK)
 
 
 class UserProfileAPIView(generics.RetrieveUpdateAPIView):

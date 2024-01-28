@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 from user.models import User
 from .validators import isDayName
@@ -45,14 +46,6 @@ class Webtoon(models.Model):
     def __str__(self):
         return self.title
 
-    def update_rating(self):
-        rating = 0.0
-        for episode in self.episodes.all():
-            rating += float(episode.rating)
-        if self.episodes.count() != 0:
-            rating /= self.episodes.count()
-        self.totalRating = rating
-        self.save()
 
 
 class Episode(models.Model):
@@ -72,7 +65,6 @@ class Episode(models.Model):
     
     # 좋아요, 싫어요
     likedBy = models.PositiveIntegerField(default=0)
-    dislikedBy = models.PositiveIntegerField(default=0)
 
     class Meta:
         unique_together = ['webtoon', 'episodeNumber']
@@ -80,14 +72,6 @@ class Episode(models.Model):
     def __str__(self):
         return str(self.episodeNumber) + '. ' + self.title
 
-    def update_rating(self):
-        rating = 0.0
-        for episode in self.episodes.all():
-            rating += float(episode.rating)
-        if self.episodes.count() != 0:
-            rating /= self.episodes.count()
-        self.totalRating = rating
-        self.save()
 
 
 class Comment(models.Model):
@@ -126,7 +110,7 @@ class Tag(models.Model):
 
 class Rating(models.Model):
     """평점 모델"""
-    rating = models.PositiveIntegerField()
+    rating = models.PositiveIntegerField(default=1, validators=[MaxValueValidator(5), MinValueValidator(1)])
     createdBy = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ratings')
     ratingOn = models.ForeignKey(Episode, on_delete=models.CASCADE, related_name='ratings', blank=True, null=True)
 
