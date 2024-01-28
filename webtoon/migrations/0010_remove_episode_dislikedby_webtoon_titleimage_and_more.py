@@ -11,10 +11,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='episode',
-            name='dislikedBy',
-        ),
         migrations.AlterField(
             model_name='rating',
             name='rating',
