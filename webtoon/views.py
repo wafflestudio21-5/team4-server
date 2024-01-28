@@ -40,7 +40,7 @@ from .paginations import (CommentCursorPagination,
                           EpisodeCursorPagination,
                           )
 
-from imageUploader import S3ImageUploader
+from .imageUploader import S3ImageUploader
 
 def annotateLatestUploadDate(queryset):
     """Webtoon queryset을 가장 최근 에피소드 업로드 순으로 정렬"""
@@ -101,7 +101,7 @@ class WebtoonAPIView(RetrieveUpdateDestroyAPIView):
         except:
             return Response({"error" : "Wrong Image Request"}, status=400)
         kwargs += {"titleImage" : url}
-        
+
         return super().update(request, *args, **kwargs)
 
 
