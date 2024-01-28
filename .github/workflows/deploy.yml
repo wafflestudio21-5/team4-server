@@ -39,6 +39,11 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
+          SOCIAL_AUTH_KAKAO_REST_API_KEY: ${{ secrets.SOCIAL_AUTH_KAKAO_REST_API_KEY }}
+          SOCIAL_AUTH_KAKAO_SECRET: ${{ secrets.SOCIAL_AUTH_KAKAO_SECRET }}
+          SOCIAL_AUTH_GOOGLE_CLIENT_ID: ${{ secrets.SOCIAL_AUTH_GOOGLE_CLIENT_ID }}
+          SOCIAL_AUTH_GOOGLE_CLIENT_SECRET: ${{ secrets.SOCIAL_AUTH_GOOGLE_CLIENT_SECRET }}
+          STATE: ${{ secrets.STATE }}
 
   build:
     needs: ci
@@ -64,6 +69,16 @@ jobs:
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
           echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
           echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+          echo "SOCIAL_AUTH_KAKAO_REST_API_KEY=${{ secrets.SOCIAL_AUTH_KAKAO_REST_API_KEY }}" >> .env
+          echo "SOCIAL_AUTH_KAKAO_SECRET=${{ secrets.SOCIAL_AUTH_KAKAO_SECRET }}" >> .env
+          echo "SOCIAL_AUTH_GOOGLE_CLIENT_ID=${{ secrets.SOCIAL_AUTH_GOOGLE_CLIENT_ID }}" >> .env
+          echo "SOCIAL_AUTH_GOOGLE_CLIENT_SECRET=${{ secrets.SOCIAL_AUTH_GOOGLE_CLIENT_SECRET }}" >> .env
+          echo "STATE=${{ secrets.STATE }}" >> .env
+
+
+
+
+
 
       - name: Install dependencies & migration
         run: |
