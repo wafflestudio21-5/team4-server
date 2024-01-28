@@ -46,6 +46,12 @@ jobs:
           AWS_S3_REGION_NAME: ${{ secrets.AWS_S3_REGION_NAME }}
 
 
+          SOCIAL_AUTH_KAKAO_REST_API_KEY: ${{ secrets.SOCIAL_AUTH_KAKAO_REST_API_KEY }}
+          SOCIAL_AUTH_KAKAO_SECRET: ${{ secrets.SOCIAL_AUTH_KAKAO_SECRET }}
+          SOCIAL_AUTH_GOOGLE_CLIENT_ID: ${{ secrets.SOCIAL_AUTH_GOOGLE_CLIENT_ID }}
+          SOCIAL_AUTH_GOOGLE_CLIENT_SECRET: ${{ secrets.SOCIAL_AUTH_GOOGLE_CLIENT_SECRET }}
+          STATE: ${{ secrets.STATE }}
+
   build:
     needs: ci
     runs-on: ubuntu-latest
@@ -75,6 +81,14 @@ jobs:
           echo "S3_URL=${{ secrets.S3_URL }}" >> .env
           echo "AWS_STORAGE_BUCKET_NAME=${{ secrets.AWS_STORAGE_BUCKET_NAME }}" >> .env
           echo "AWS_S3_REGION_NAME=${{ secrets.AWS_S3_REGION_NAME }}" >> .env
+          echo "SOCIAL_AUTH_KAKAO_REST_API_KEY=${{ secrets.SOCIAL_AUTH_KAKAO_REST_API_KEY }}" >> .env
+          echo "SOCIAL_AUTH_KAKAO_SECRET=${{ secrets.SOCIAL_AUTH_KAKAO_SECRET }}" >> .env
+          echo "SOCIAL_AUTH_GOOGLE_CLIENT_ID=${{ secrets.SOCIAL_AUTH_GOOGLE_CLIENT_ID }}" >> .env
+          echo "SOCIAL_AUTH_GOOGLE_CLIENT_SECRET=${{ secrets.SOCIAL_AUTH_GOOGLE_CLIENT_SECRET }}" >> .env
+          echo "STATE=${{ secrets.STATE }}" >> .env
+
+
+
 
       - name: Install dependencies & migration
         run: |
