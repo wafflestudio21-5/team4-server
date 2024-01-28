@@ -10,12 +10,12 @@ from dj_rest_auth.views import (
 from dj_rest_auth.registration.views import ResendEmailVerificationView
 from dj_rest_auth import urls
 
-from .views import CustomVerifyEmailView, CustomLoginView, CustomLogoutView, CustomRegisterView, KakaoLogin, GoogleLogin
+from .views import CustomVerifyEmailView, CustomLoginView, CustomLogoutView, CustomRegisterView, KakaoLogin, GoogleLogin, CustomPasswordResetConfirmView
 from . import views
 
 urlpatterns = [
     path('password/reset/', PasswordResetView.as_view(), name='rest_password_reset'), # TODO: error occured
-    path('password/reset/confirm/<uidb64>/<token>/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'), # TODO: error occured
+    path('password/reset/confirm/<uid>/<token>/', CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'), # TODO: error occured
        
     path('login/', CustomLoginView.as_view(), name='rest_login'),
     path('logout/', CustomLogoutView.as_view(), name='rest_logout'),
