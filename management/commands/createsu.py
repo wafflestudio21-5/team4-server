@@ -7,8 +7,8 @@ class Command(BaseCommand):
     help = "Creates a superuser."
 
     def handle(self, *args, **options):
-        username = "admin"
-        nickname = "admin"
+        username = "watoonadmin"
+        nickname = "watoonadmin"
         if not User.objects.filter(nickname=nickname).exists():
             email = os.environ.get("DJANGO_SUPERUSER_EMAIL")
             password = os.environ.get("DJANGO_SUPERUSER_PASSWORD")
