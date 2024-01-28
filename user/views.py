@@ -48,34 +48,18 @@ class CustomPasswordResetConfirmView(PasswordResetConfirmView):
     permission_classes = (AllowAny,)
     throttle_scope = 'dj_rest_auth'
 
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data, context={'request': request})
+    @sensitive_post_parameters_m
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def post(self, request, uid, token, *args, **kwargs):
+        context = {'uid': uid, 'token': token}
+        serializer = CustomPasswordResetConfirmSerializer(data=request.data, context=context)
         serializer.is_valid(raise_exception=True)
-        # Manually handle the logic to save the data
-        self.perform_password_reset(serializer.validated_data)
-
-        return Response({'detail': _('Password has been reset with the new password.')})
-
-    def perform_password_reset(self, validated_data):
-        # Extract necessary data and perform password reset logic here
-        uid = validated_data['uid']
-        token = validated_data['token']
-        new_password = validated_data['new_password1']
-
-        # Add your logic here to reset the password using the extracted data
-        # For example, you can use the UserModel to retrieve the user and update the password
-        try:
-            user = User._default_manager.get(pk=uid)
-        except User.DoesNotExist:
-            raise ValidationError({'uid': [_('Invalid value')]})
-
-        if not default_token_generator.check_token(user, token):
-            raise ValidationError({'token': [_('Invalid value')]})
-
-        # Your password reset logic here, for example:
-        user.set_password(new_password)
-        user.save()
-
+        serializer.save()
+        return Response(
+            {'detail': _('Password has been reset with the new password.')},
+        )
 
 class CustomVerifyEmailView(VerifyEmailView):
     def get(self, request, *args, **kwargs):
