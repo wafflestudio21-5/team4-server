@@ -289,13 +289,29 @@ class CommentContentSerializer(serializers.ModelSerializer):
     # comments = CommentInfoSerializer(many=True, read_only=True)
     subComments = serializers.SerializerMethodField(method_name='getComments', read_only=True)
     createdBy = UserInfoSerializer(read_only=True)
+    liking = serializers.SerializerMethodField(method_name='isLiking', read_only=True)
+    disiking = serializers.SerializerMethodField(method_name='isDisliking', read_only=True)
+
     class Meta:
         model = Comment
-        fields = ['id', 'content', 'dtCreated', 'dtUpdated', 'createdBy', 'subComments', 'likedBy', 'dislikedBy']
+        fields = ['id', 'content', 'dtCreated', 'dtUpdated', 'createdBy', 'subComments', 'likedBy', 'dislikedBy', 'liking', 'disliking']
         read_only_fields = ['dtCreated', 'dtUpdated', 'createdBy', 'subComments', 'likedBy', 'dislikedBy']
 
     def getComments(self, obj):
         return obj.comments.count()
+    
+    def isLiking(self, obj):
+        user = self.context.get('request').user
+        if not user.is_authenticated:
+            return False
+        return Like.objects.filter(createdBy=user).filter(comment=obj).filter(isLike=True).exists()
+
+    def isDisliking(self, obj):
+        user = self.context.get('request').user
+        if not user.is_authenticated:
+            return False
+        return Like.objects.filter(createdBy=user).filter(comment=obj).filter(isDislike=True).exists()
+
 
 
 
