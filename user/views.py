@@ -36,6 +36,9 @@ sensitive_post_parameters_m = method_decorator(
     ),
 )
 
+class TokenException(Exception):
+    pass
+
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
@@ -92,6 +95,7 @@ class CustomRegisterView(RegisterView):
 
 
 
+#BASE_URL = 'http://127.0.0.1:8000/'
 BASE_URL = 'http://watoon-env1.eba-ytauqqvt.ap-northeast-2.elasticbeanstalk.com/'
 KAKAO_CALLBACK_URI = BASE_URL + 'accounts/kakao/callback/'
 GOOGLE_CALLBACK_URI = BASE_URL + 'accounts/google/callback/'
@@ -132,6 +136,8 @@ def kakao_callback(request):
     email = kakao_account.get('email')
     #nickname = kakao_account.get('profile').get('nickname')
     #print(email, nickname)
+    user = None
+
     try:
         user = User.objects.get(email=email)
 
@@ -148,11 +154,13 @@ def kakao_callback(request):
             return JsonResponse({'err_msg': 'failed to signin'}, status=accept_status)
 
         accept_json = accept.json()
-        accept_json.pop('user', None)
+        if accept_json['user'] is not None:
+            accept_json['user']['nickname'] = user.nickname
         return JsonResponse(accept_json)
 
     except User.DoesNotExist:
-        data = {'access_token': access_token, 'code': auth_code}
+        nickname = request.GET.get("nickname")
+        data = {'access_token': access_token, 'code': auth_code, 'nickname': nickname}
         
         accept = requests.post(f"{BASE_URL}accounts/kakao/login/finish/", data=data)
         accept_status = accept.status_code
@@ -161,9 +169,11 @@ def kakao_callback(request):
             return JsonResponse({'err_msg': 'failed to signup'}, status=accept_status)
 
         accept_json = accept.json()
-        accept_json.pop('user', None)
+        if accept_json['user'] is not None:
+            user = User.objects.get(email=accept_json['user']['email'])
+            accept_json['user']['nickname'] = user.nickname
         return JsonResponse(accept_json)
-
+    
     except SocialAccount.DoesNotExist:
         return JsonResponse({'err_msg': 'email exists but not social user'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -225,12 +235,14 @@ def google_callback(request):
             return JsonResponse({'err_msg': 'failed to signin'}, status=accept_status)
 
         accept_json = accept.json()
-        accept_json.pop('user', None)
+        if accept_json['user'] is not None:
+            accept_json['user']['nickname'] = user.nickname
         return JsonResponse(accept_json)
 
     except User.DoesNotExist:    # DoesNotExist -> Django Model에서 기본 지원
         # 전달받은 이메일로 기존에 가입된 유저가 아예 없으면 => 새로 회원가입 & 해당 유저의 jwt 발급
-        data = {'access_token': access_token, 'code': code}
+        nickname = request.GET.get("nickname")
+        data = {'access_token': access_token, 'code': code, 'nickname': nickname}
 
         accept = requests.post(f"{BASE_URL}accounts/google/login/finish/", data=data)
         accept_status = accept.status_code
@@ -240,7 +252,9 @@ def google_callback(request):
             return JsonResponse({'err_msg': 'failed to signup'}, status=accept_status)
 
         accept_json = accept.json()
-        accept_json.pop('user', None)
+        if accept_json['user'] is not None:
+            user = User.objects.get(email=accept_json['user']['email'])
+            accept_json['user']['nickname'] = user.nickname
         return JsonResponse(accept_json)
 
     except SocialAccount.DoesNotExist:
@@ -248,10 +262,11 @@ def google_callback(request):
         return JsonResponse({'err_msg': 'email exists but not social user'}, status=status.HTTP_400_BAD_REQUEST)
 
 class GoogleLogin(SocialLoginView):
+    permission_classes = (IsNotAuthenticated,)
     adapter_class = CustomGoogleOAuth2Adapter
     callback_url = GOOGLE_CALLBACK_URI
     client_class = OAuth2Client
-
+    
 
 def NickNameVerify(request, nickname):
     user = User.objects.get(nickname=nickname)
