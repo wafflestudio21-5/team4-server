@@ -160,7 +160,7 @@ class EpisodeContentSerializer(serializers.ModelSerializer):
     imageUrl = serializers.SerializerMethodField(method_name='getImageUrl', read_only=True)
     class Meta:
         model = Episode
-        fields = ['id', 'title', 'episodeNumber', 'rating', 'releasedDate', 'webtoon', 'previousEpisode', 'nextEpisode']
+        fields = ['id', 'title', 'episodeNumber', 'rating', 'releasedDate', 'webtoon', 'previousEpisode', 'nextEpisode', 'imageUrl']
         #fields = ['id', 'title', 'episodeNumber', 'thumbnail', 'content', 'rating', 'releasedDate']
         read_only_fields = ['rating', 'releasedDate', 'previousEpisode', 'nextEpisode']
     
