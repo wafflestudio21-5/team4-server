@@ -33,7 +33,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
+    
 
 # Application definition
 
@@ -63,7 +63,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google', # <- 필요한 소셜 로그인 추가
     'allauth.socialaccount.providers.kakao',
-
+    
     'widget_tweaks',
 
     'django_filters',
@@ -305,6 +305,7 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+
 SOCIALACCOUNT_ADAPTER = "user.adapter.CustomSocialAccountAdapter"
 SOCIALACCOUNT_EMAIL_VERIFICATION = False
 
@@ -314,3 +315,4 @@ S3_SECRET_ACCESS_KEY = os.getenv("S3_SECRET_ACCESS_KEY")
 AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
 AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME")
 S3_URL = os.getenv("S3_URL")
+
