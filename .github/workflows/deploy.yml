@@ -45,15 +45,17 @@ jobs:
           AWS_STORAGE_BUCKET_NAME : ${{ secrets.AWS_STORAGE_BUCKET_NAME }}
           AWS_S3_REGION_NAME: ${{ secrets.AWS_S3_REGION_NAME }}
 
-
           SOCIAL_AUTH_KAKAO_REST_API_KEY: ${{ secrets.SOCIAL_AUTH_KAKAO_REST_API_KEY }}
           SOCIAL_AUTH_KAKAO_SECRET: ${{ secrets.SOCIAL_AUTH_KAKAO_SECRET }}
           SOCIAL_AUTH_GOOGLE_CLIENT_ID: ${{ secrets.SOCIAL_AUTH_GOOGLE_CLIENT_ID }}
           SOCIAL_AUTH_GOOGLE_CLIENT_SECRET: ${{ secrets.SOCIAL_AUTH_GOOGLE_CLIENT_SECRET }}
           STATE: ${{ secrets.STATE }}
 
+          DJANGO_SUPERUSER_EMAIL: ${{ secrets.DJANGO_SUPERUSER_EMAIL }}
+          DJANGO_SUPERUSER_PASSWORD: ${{ secrets.DJANGO_SUPERUSER_PASSWORD }}
+
   build:
-    needs: ci
+#    needs: ci
     runs-on: ubuntu-latest
     environment: env
     steps:
@@ -87,8 +89,8 @@ jobs:
           echo "SOCIAL_AUTH_GOOGLE_CLIENT_SECRET=${{ secrets.SOCIAL_AUTH_GOOGLE_CLIENT_SECRET }}" >> .env
           echo "STATE=${{ secrets.STATE }}" >> .env
 
-
-
+          echo "DJANGO_SUPERUSER_EMAIL=${{ secrets.DJANGO_SUPERUSER_EMAIL }}" >> .env
+          echo "DJANGO_SUPERUSER_PASSWORD=${{ secrets.DJANGO_SUPERUSER_PASSWORD }}" >> .env
 
       - name: Install dependencies & migration
         run: |

@@ -11,13 +11,13 @@ from rest_framework.response import Response
 from rest_framework import generics 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework import filters
 from django.contrib.contenttypes.models import ContentType
 
 from user.models import User
 
-from .models import Webtoon, Comment, DayOfWeek, Episode, Tag, UserProfile 
+from .models import Webtoon, Comment, DayOfWeek, Episode, Tag, UserProfile, Rating, Like
 from .serializers import (WebtoonContentSerializer,
                           WebtoonInfoSerializer,
                           WebtoonContentSerializer,
@@ -25,16 +25,21 @@ from .serializers import (WebtoonContentSerializer,
                           EpisodeContentSerializer,
                           # CommentInfoSerializer,
                           CommentContentSerializer,
-                          DayOfWeekSerializer
+                          DayOfWeekSerializer, 
+                          RatingSerializer, 
+                          LikeSerializer,
+                          UserProfileSerializer,
                           )
 from .permissions import (IsAuthorOrReadOnly,
                           IsWebtoonAuthorOrReadOnly,
                           IsEpisodeAuthorOrReadOnly,
                           IsEpisodeWebtoonAuthorOrReadOnly,
                           IsCommentAuthorOrReadOnly,
+                          IsProfileUserOrReadOnly,
                           )
 from .validators import isDayName
 from .paginations import (CommentCursorPagination,
+                          SubCommentCursorPagination,
                           WebtoonCursorPagination,
                           PaginationHandlerMixin,
                           EpisodeCursorPagination,
@@ -95,12 +100,13 @@ class WebtoonAPIView(RetrieveUpdateDestroyAPIView):
         return Response(status=200)
     
     def update(self, request, *args, **kwargs):
-        image = request.FILES['titleImage']
-        try :
-            url = S3ImageUploader(image, request.data['title']).upload()
-        except:
-            return Response({"error" : "Wrong Image Request"}, status=400)
-        kwargs += {"titleImage" : url}
+        if "titleImage" in request.FILES : 
+            image = request.FILES['titleImage']
+            try :
+                url = S3ImageUploader(image, request.data['title']).upload()
+            except:
+                return Response({"error" : "Wrong Image Request"}, status=400)
+            kwargs += {"titleImage" : url}
 
         return super().update(request, *args, **kwargs)
 
@@ -119,7 +125,7 @@ class EpisodeAPIView(RetrieveUpdateDestroyAPIView):
 class SubCommentListAPIView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = CommentContentSerializer
-    pagination_class = CommentCursorPagination
+    pagination_class = SubCommentCursorPagination
 
     def get_comment(self):
         """상위 댓글 가져오기"""
@@ -204,14 +210,16 @@ class WebtoonListAPIView(APIView, PaginationHandlerMixin):
         if "tags" not in request.data :
             request.data['tags'] = []
 
-        image = request.FILES['titleImage']
-        try :
-            url = S3ImageUploader(image, request.data['title']).upload()
-        except:
-            return Response({"error" : "Wrong Image Request"}, status=400)
-        
-        kwargs = {'context': self.get_serializer_context(),
-                  'titleImage' : url}
+        kwargs = {'context': self.get_serializer_context()}
+                  
+        if "titleImage" in request.FILES:
+            image = request.FILES['titleImage']
+            try :
+                url = S3ImageUploader(image, request.FILES['title']).upload()
+            except:
+                return Response({"error" : "Wrong Image Request"}, status=400)
+            
+            kwargs += {'titleImage' : url}
 
         serializer = WebtoonContentSerializer (data = request.data, **kwargs)
         if serializer.is_valid(raise_exception=True):
@@ -402,3 +410,161 @@ class WebtoonSearchView(generics.ListAPIView):
 
 class DayOfWeekCreateAPIView(generics.CreateAPIView):
     serializer_class = DayOfWeekSerializer
+    
+
+class EpisodeRatingAPIView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = RatingSerializer
+    
+    def get_ratingOn(self):
+        return get_object_or_404(Episode, pk=self.kwargs.get('pk'))
+    
+    def get_object(self):
+        ratingOn = self.get_ratingOn()
+        user = self.request.user
+        return Rating.objects.filter(ratingOn=ratingOn).filter(createdBy=user).first()  
+    
+    def update_rating(self):
+        #episode의 totalRating 계산
+        ratingOn = self.get_ratingOn()
+        ratings = Rating.objects.filter(ratingOn=ratingOn)
+        totalRating = 0.0
+        for rating in ratings:
+            totalRating += rating.rating
+        
+        if ratings.count() != 0:
+            totalRating /= ratings.count()
+        else:
+            totalRating = 0
+        ratingOn.totalRating = totalRating
+        ratingOn.save()
+        
+        #webtoon의 totalRating 계산
+        webtoon = ratingOn.webtoon
+        episodes = Episode.objects.filter(webtoon=webtoon)
+        totalRating = 0.0
+        for episode in episodes:
+            totalRating += float(episode.totalRating)
+        
+        if episodes.count() != 0:
+            totalRating /= episodes.count()
+        else:
+            totalRating = 0
+        webtoon.totalRating = totalRating
+        webtoon.save()
+    
+    def perform_update(self, serializer):
+        createdBy = self.request.user
+        ratingOn = self.get_ratingOn()
+        serializer.save(createdBy=createdBy, ratingOn=ratingOn)
+        self.update_rating()
+    
+    def perform_destroy(self, serializer):
+        ratingOn = self.get_ratingOn()
+        user = self.request.user
+        try:
+            Rating.objects.filter(ratingOn=ratingOn).filter(createdBy=user).first().delete()
+        except:
+            raise Http404("Rating object does not exist")
+        self.update_rating()
+    
+    def delete(self, request, pk):
+        super().delete(request, pk)
+        return Response(status=status.HTTP_200_OK)
+        
+
+class EpisodeLikeAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get_likeOn(self):
+        return Episode.objects.get(pk=self.kwargs.get('pk'))
+    
+    def get_object(self):
+        likeOn = self.get_likeOn()
+        user = self.request.user
+        return Like.objects.filter(episode=likeOn).filter(createdBy=user).first()
+    
+    def update_like(self):
+        #episode의 총 like 수 계산
+        likeOn = self.get_likeOn()
+        likes = Like.objects.filter(episode=likeOn)
+        totalLikes = 0
+        
+        for like in likes:
+            if like.isLike:
+                totalLikes += 1
+        
+        likeOn.likedBy = totalLikes
+        likeOn.save()        
+        
+    def post(self, request, pk):
+        createdBy = request.user
+        likeOn = self.get_likeOn()
+        if Like.objects.filter(createdBy=createdBy).filter(episode=likeOn).exists():
+            Like.objects.filter(createdBy=createdBy).filter(episode=likeOn).first().delete()
+        else:
+            like = Like.objects.create(createdBy=createdBy, isLike=True, isDislike=False)
+            like.likeOn = likeOn
+            like.save()
+            
+        self.update_like()
+        return Response(status=status.HTTP_200_OK)
+        
+
+class CommentLikeAPIView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = LikeSerializer
+    
+    def get_likeOn(self):
+        return Comment.objects.get(pk=self.kwargs.get('pk'))
+    
+    def get_object(self):
+        likeOn = self.get_likeOn()
+        user = self.request.user
+        return Like.objects.filter(comment=likeOn).filter(createdBy=user).first()
+
+    def update_like(self):
+        #comment의 총 like 수 계산
+        likeOn = self.get_likeOn()
+        likes = Like.objects.filter(comment=likeOn)
+        totalLikes = 0
+        totalDislikes = 0
+        
+        for like in likes:
+            if like.isLike:
+                totalLikes += 1
+            if like.isDislike:
+                totalDislikes += 1
+        
+        likeOn.likedBy = totalLikes
+        likeOn.dislikedBy = totalDislikes
+        likeOn.save()        
+    
+    def perform_update(self, serializer):
+        createdBy = self.request.user
+        likeOn = self.get_likeOn()
+        serializer.save(createdBy=createdBy, likeOn=likeOn)
+        self.update_like()
+    
+    def perform_destroy(self, serializer):
+        likeOn = self.get_likeOn()
+        user = self.request.user
+        try:
+            Like.objects.filter(comment=likeOn).filter(createdBy=user).first().delete()
+        except:
+            raise Http404("Like object does not exist")
+        self.update_like()
+    
+    def delete(self, request, pk):
+        super().delete(request, pk)
+        return Response(status=status.HTTP_200_OK)
+
+
+class UserProfileAPIView(generics.RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticatedOrReadOnly, IsProfileUserOrReadOnly]
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer
+
+    def get_object(self):
+        user = self.kwargs.get('pk')
+        return get_object_or_404(UserProfile, user=user)
