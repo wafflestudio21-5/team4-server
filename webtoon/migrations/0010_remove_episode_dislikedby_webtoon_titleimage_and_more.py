@@ -15,11 +15,6 @@ class Migration(migrations.Migration):
             model_name='episode',
             name='dislikedBy',
         ),
-        migrations.AddField(
-            model_name='webtoon',
-            name='titleImage',
-            field=models.CharField(max_length=50, null=True),
-        ),
         migrations.AlterField(
             model_name='rating',
             name='rating',
