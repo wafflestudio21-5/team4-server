@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -133,3 +135,7 @@ class Like(models.Model):
     class Meta:
         unique_together = ['createdBy', 'content_type', 'object_id']
                      
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance, name=instance.nickname)
