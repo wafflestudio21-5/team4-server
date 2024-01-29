@@ -22,6 +22,8 @@ from .views import (WebtoonAPIView,
                     EpisodeLikeAPIView, 
                     CommentLikeAPIView, 
                     UserProfileAPIView,
+                    AuthorSubscribeAPIView,
+                    SubscribeAuthorListAPIView,
                    )
 
 urlpatterns = [
@@ -42,6 +44,8 @@ urlpatterns = [
     path('api/comment/<int:pk>/comment', SubCommentListAPIView.as_view()),
 
     path('api/profile/<int:pk>', UserProfileAPIView.as_view()),
+    path('api/profile/<int:pk>/subscribe', AuthorSubscribeAPIView.as_view()),
+    path('api/profile/subscribeAuthorList', SubscribeAuthorListAPIView.as_view()),
     path('api/profile/<int:pk>/uploadWebtoonList', UploadWebtoonListAPIView.as_view()),
     path('api/profile/subscribeWebtoonList', SubscribeWebtoonListAPIView.as_view()),
 

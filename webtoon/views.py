@@ -28,6 +28,7 @@ from .serializers import (WebtoonContentSerializer,
                           DayOfWeekSerializer, 
                           RatingSerializer, 
                           LikeSerializer,
+                          UserInfoSerializer,
                           UserProfileSerializer,
                           )
 from .permissions import (IsAuthorOrReadOnly,
@@ -379,6 +380,25 @@ class UploadWebtoonListAPIView(generics.ListAPIView):
         queryset = Webtoon.objects.filter(author=user)
         # return orderByLatestEpisode(queryset)
         return queryset
+
+
+class AuthorSubscribeAPIView(APIView):
+    def post(self, request, pk):
+        author = get_object_or_404(User, pk=pk)
+        if not author.profile.isAuthor:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        if author.profile.subscribers.filter(pk=request.user.pk).exists():
+            author.profile.subscribers.remove(request.user.profile)
+        else:
+            author.profile.subscribers.add(request.user.profile)
+        return Response(status=status.HTTP_200_OK)
+
+
+class SubscribeAuthorListAPIView(generics.ListAPIView):
+    serializer_class = UserInfoSerializer
+
+    def get_queryset(self):
+        return User.objects.filter(profile__subscribers=self.request.user.profile).order_by('nickname')
 
 
 class WebtoonSubscribeAPIView(APIView):
