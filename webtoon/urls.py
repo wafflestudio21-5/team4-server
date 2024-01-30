@@ -45,8 +45,8 @@ urlpatterns = [
 
     path('api/profile/<int:pk>', UserProfileAPIView.as_view()),
     path('api/profile/<int:pk>/subscribe', AuthorSubscribeAPIView.as_view()),
-    path('api/profile/subscribeAuthorList', SubscribeAuthorListAPIView.as_view()),
     path('api/profile/<int:pk>/uploadWebtoonList', UploadWebtoonListAPIView.as_view()),
+    path('api/profile/subscribeAuthorList', SubscribeAuthorListAPIView.as_view()),
     path('api/profile/subscribeWebtoonList', SubscribeWebtoonListAPIView.as_view()),
 
     path('api/episode/<int:pk>/rating', EpisodeRatingAPIView.as_view()), 
