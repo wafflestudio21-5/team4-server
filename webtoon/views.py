@@ -28,12 +28,14 @@ from .serializers import (WebtoonContentSerializer,
                           DayOfWeekSerializer, 
                           RatingSerializer, 
                           LikeSerializer,
-                          UserProfileSerializer,
+                          UserInfoSerializer,
+                          UserProfileContentSerializer,
                           )
 from .permissions import (IsAuthorOrReadOnly,
                           IsWebtoonAuthorOrReadOnly,
                           IsEpisodeAuthorOrReadOnly,
                           IsEpisodeWebtoonAuthorOrReadOnly,
+                          IsNotFinishedOrReadOnly,
                           IsCommentAuthorOrReadOnly,
                           IsProfileUserOrReadOnly,
                           )
@@ -266,7 +268,7 @@ class DayWebtoonListAPIView(generics.ListAPIView):
 
 
 class EpisodeListAPIView(APIView, PaginationHandlerMixin):
-    permission_classes = [IsAuthenticatedOrReadOnly, IsEpisodeWebtoonAuthorOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsEpisodeWebtoonAuthorOrReadOnly, IsNotFinishedOrReadOnly,]
     pagination_class = EpisodeCursorPagination
     serializer_class = EpisodeContentSerializer
 
@@ -379,6 +381,25 @@ class UploadWebtoonListAPIView(generics.ListAPIView):
         queryset = Webtoon.objects.filter(author=user)
         # return orderByLatestEpisode(queryset)
         return queryset
+
+
+class AuthorSubscribeAPIView(APIView):
+    def post(self, request, pk):
+        author = get_object_or_404(User, pk=pk)
+        if not author.profile.isAuthor:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        if author.profile.subscribers.filter(pk=request.user.pk).exists():
+            author.profile.subscribers.remove(request.user.profile)
+        else:
+            author.profile.subscribers.add(request.user.profile)
+        return Response(status=status.HTTP_200_OK)
+
+
+class SubscribeAuthorListAPIView(generics.ListAPIView):
+    serializer_class = UserInfoSerializer
+
+    def get_queryset(self):
+        return User.objects.filter(profile__subscribers=self.request.user.profile).order_by('nickname')
 
 
 class WebtoonSubscribeAPIView(APIView):
@@ -563,7 +584,7 @@ class CommentLikeAPIView(generics.RetrieveUpdateDestroyAPIView):
 class UserProfileAPIView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly, IsProfileUserOrReadOnly]
     queryset = UserProfile.objects.all()
-    serializer_class = UserProfileSerializer
+    serializer_class = UserProfileContentSerializer
 
     def get_object(self):
         user = self.kwargs.get('pk')
