@@ -95,8 +95,8 @@ class CustomRegisterView(RegisterView):
 
 
 
-#BASE_URL = 'http://127.0.0.1:8000/'
-BASE_URL = 'http://watoon-env1.eba-ytauqqvt.ap-northeast-2.elasticbeanstalk.com/'
+BASE_URL = 'http://127.0.0.1:8000/'
+#BASE_URL = 'http://watoon-env1.eba-ytauqqvt.ap-northeast-2.elasticbeanstalk.com/'
 KAKAO_CALLBACK_URI = BASE_URL + 'accounts/kakao/callback/'
 GOOGLE_CALLBACK_URI = BASE_URL + 'accounts/google/callback/'
 
@@ -268,8 +268,17 @@ class GoogleLogin(SocialLoginView):
     client_class = OAuth2Client
     
 
-def NickNameVerify(request, nickname):
-    user = User.objects.get(nickname=nickname)
-    if user is None:
-        return JsonResponse({"nickname" : "possible"})
-    return JsonResponse({"nickname": "impossible"})
+def nickname_duplicate_check(request, nickname):
+    if nickname == "":
+        return JsonResponse({"nickname" : "nickname is null"})
+    if User.objects.filter(nickname=nickname).exists():
+        return JsonResponse({"nickname" : "impossible"})
+    return JsonResponse({"nickname": "possible"})
+
+def email_duplicate_check(request, email):
+    if email == "":
+        return JsonResponse({"email" : "email is null"})
+    if User.objects.filter(email=email).exists():
+        return JsonResponse({"email" : "impossible"})
+    return JsonResponse({"email": "possible"})
+
