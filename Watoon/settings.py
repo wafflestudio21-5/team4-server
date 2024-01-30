@@ -67,6 +67,8 @@ INSTALLED_APPS = [
     'widget_tweaks',
 
     'django_filters',
+    
+    'storages',
 ]
 
 SITE_ID = 1
@@ -312,7 +314,15 @@ SOCIALACCOUNT_EMAIL_VERIFICATION = False
 #S3 Image Uploader 
 S3_ACCESS_KEY_ID = os.getenv("S3_ACCESS_KEY_ID ")
 S3_SECRET_ACCESS_KEY = os.getenv("S3_SECRET_ACCESS_KEY")
-AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
 AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME")
+AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
+
+AWS_S3_CUSTOM_DOMAIN = '%s.s3.%s.amazonaws.com' % (AWS_STORAGE_BUCKET_NAME,AWS_S3_REGION_NAME)
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',
+}
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+MEDIA_URL = "https://%s/meida/" % AWS_S3_CUSTOM_DOMAIN
+
 S3_URL = os.getenv("S3_URL")
 
