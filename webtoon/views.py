@@ -29,12 +29,13 @@ from .serializers import (WebtoonContentSerializer,
                           RatingSerializer, 
                           LikeSerializer,
                           UserInfoSerializer,
-                          UserProfileSerializer,
+                          UserProfileContentSerializer,
                           )
 from .permissions import (IsAuthorOrReadOnly,
                           IsWebtoonAuthorOrReadOnly,
                           IsEpisodeAuthorOrReadOnly,
                           IsEpisodeWebtoonAuthorOrReadOnly,
+                          IsNotFinishedOrReadOnly,
                           IsCommentAuthorOrReadOnly,
                           IsProfileUserOrReadOnly,
                           )
@@ -267,7 +268,7 @@ class DayWebtoonListAPIView(generics.ListAPIView):
 
 
 class EpisodeListAPIView(APIView, PaginationHandlerMixin):
-    permission_classes = [IsAuthenticatedOrReadOnly, IsEpisodeWebtoonAuthorOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsEpisodeWebtoonAuthorOrReadOnly, IsNotFinishedOrReadOnly,]
     pagination_class = EpisodeCursorPagination
     serializer_class = EpisodeContentSerializer
 
@@ -583,7 +584,7 @@ class CommentLikeAPIView(generics.RetrieveUpdateDestroyAPIView):
 class UserProfileAPIView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly, IsProfileUserOrReadOnly]
     queryset = UserProfile.objects.all()
-    serializer_class = UserProfileSerializer
+    serializer_class = UserProfileContentSerializer
 
     def get_object(self):
         user = self.kwargs.get('pk')

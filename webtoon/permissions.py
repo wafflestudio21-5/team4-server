@@ -35,6 +35,13 @@ class IsEpisodeWebtoonAuthorOrReadOnly(BasePermission):
         return webtoon.author == request.user
 
 
+class IsNotFinishedOrReadOnly(BasePermission):
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+        return not view.getWebtoon(view.kwargs.get('pk')).isFinished
+
+
 class IsCommentAuthorOrReadOnly(BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS:

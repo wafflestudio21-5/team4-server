@@ -253,8 +253,8 @@ class UserInfoSerializer(serializers.ModelSerializer):
         return value
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
-    """유저 Serializer"""
+class UserProfileContentSerializer(serializers.ModelSerializer):
+    """프로필 페이지 Serializer"""
     id = serializers.SerializerMethodField(method_name='getUserId', read_only=True)
     nickname = serializers.SerializerMethodField(method_name='getNickname', read_only=True)
     subscriberNumber = serializers.SerializerMethodField(method_name='getSubscriberNumber', read_only=True)

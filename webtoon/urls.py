@@ -54,5 +54,5 @@ urlpatterns = [
     path('api/comment/<int:pk>/like', CommentLikeAPIView.as_view()), 
 
     # 임시 엔드포인트
-    path('api/dayofweek', DayOfWeekCreateAPIView.as_view())
+    # path('api/dayofweek', DayOfWeekCreateAPIView.as_view())
 ]
