@@ -102,13 +102,13 @@ class WebtoonAPIView(RetrieveUpdateDestroyAPIView):
         return Response(status=200)
     
     def update(self, request, *args, **kwargs):
-        if "titleImage" in request.FILES : 
-            image = request.FILES['titleImage']
-            try :
-                url = S3ImageUploader(image, request.data['title']).upload()
-            except:
-                return Response({"error" : "Wrong Image Request"}, status=400)
-            kwargs += {"titleImage" : url}
+        # if "titleImage" in request.FILES : 
+        #     image = request.FILES['titleImage']
+        #     try :
+        #         url = S3ImageUploader(image, request.data['title']).upload()
+        #     except:
+        #         return Response({"error" : "Wrong Image Request"}, status=400)
+        #     kwargs += {"titleImage" : url}
 
         return super().update(request, *args, **kwargs)
 
@@ -214,14 +214,14 @@ class WebtoonListAPIView(APIView, PaginationHandlerMixin):
 
         kwargs = {'context': self.get_serializer_context()}
                   
-        if "titleImage" in request.FILES:
-            image = request.FILES['titleImage']
-            try :
-                url = S3ImageUploader(image, request.FILES['title']).upload()
-            except:
-                return Response({"error" : "Wrong Image Request"}, status=400)
+        # if "titleImage" in request.FILES:
+        #     image = request.FILES['titleImage']
+        #     try :
+        #         url = S3ImageUploader(image, request.FILES['title']).upload()
+        #     except:
+        #         return Response({"error" : "Wrong Image Request"}, status=400)
             
-            kwargs += {'titleImage' : url}
+        #     kwargs += {'titleImage' : url}
 
         serializer = WebtoonContentSerializer (data = request.data, **kwargs)
         if serializer.is_valid(raise_exception=True):
