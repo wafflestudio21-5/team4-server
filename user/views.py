@@ -156,7 +156,7 @@ def kakao_callback(request):
         accept_json = accept.json()
         if accept_json['user'] is not None:
             accept_json['user']['nickname'] = user.nickname
-        return JsonResponse(accept_json)
+        return JsonResponse(accept_json, json_dumps_params={'ensure_ascii': False})
 
     except User.DoesNotExist:
         nickname = request.GET.get("nickname")
@@ -172,7 +172,7 @@ def kakao_callback(request):
         if accept_json['user'] is not None:
             user = User.objects.get(email=accept_json['user']['email'])
             accept_json['user']['nickname'] = user.nickname
-        return JsonResponse(accept_json)
+        return JsonResponse(accept_json, json_dumps_params={'ensure_ascii': False})
     
     except SocialAccount.DoesNotExist:
         return JsonResponse({'err_msg': 'email exists but not social user'}, status=status.HTTP_400_BAD_REQUEST)
@@ -237,7 +237,7 @@ def google_callback(request):
         accept_json = accept.json()
         if accept_json['user'] is not None:
             accept_json['user']['nickname'] = user.nickname
-        return JsonResponse(accept_json)
+        return JsonResponse(accept_json, json_dumps_params={'ensure_ascii': False})
 
     except User.DoesNotExist:    # DoesNotExist -> Django Model에서 기본 지원
         # 전달받은 이메일로 기존에 가입된 유저가 아예 없으면 => 새로 회원가입 & 해당 유저의 jwt 발급
@@ -255,7 +255,7 @@ def google_callback(request):
         if accept_json['user'] is not None:
             user = User.objects.get(email=accept_json['user']['email'])
             accept_json['user']['nickname'] = user.nickname
-        return JsonResponse(accept_json)
+        return JsonResponse(accept_json, json_dumps_params={'ensure_ascii': False})
 
     except SocialAccount.DoesNotExist:
     	# User는 있는데 SocialAccount가 없을 때 (=일반회원으로 가입된 이메일일때)
