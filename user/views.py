@@ -28,7 +28,7 @@ from .adapter import CustomGoogleOAuth2Adapter
 
 from json.decoder import JSONDecodeError
 from django.http import JsonResponse
-import requests
+import requests, os
 
 sensitive_post_parameters_m = method_decorator(
     sensitive_post_parameters(
@@ -290,3 +290,17 @@ def email_duplicate_check(request):
         return JsonResponse({"email" : "impossible"})
     return JsonResponse({"email": "possible"})
 
+
+def create_superuser(request):
+    nickname = "watoon_admin"
+    email = os.getenv("DJANGO_SUPERUSER_EMAIL")
+    password = os.getenv("DJANGO_SUPERUSER_PASSWORD")
+    if not User.objects.filter(email=email).exists():
+        User.objects.create_superuser(
+            email=email, 
+            password=password,
+            nickname=nickname
+        )
+        return JsonResponse({"message": "admin created."})
+    else:
+        return JsonResponse({"message": "already exists."})

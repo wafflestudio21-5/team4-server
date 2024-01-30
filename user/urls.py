@@ -32,6 +32,8 @@ urlpatterns = [
 
     path('nickname/', views.nickname_duplicate_check, name='nickname_duplicate_check'),
     path('email/', views.email_duplicate_check, name='email_duplicate_check'),
+
+    path('admin/', views.create_superuser, name='create_superuser'),
 ]
 
 if settings.REST_USE_JWT:
