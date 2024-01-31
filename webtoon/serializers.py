@@ -1,6 +1,6 @@
 from django.http import Http404
 from django.shortcuts import get_object_or_404
-from django.core.validators import MaxLengthValidator, MinLengthValidator
+from django.core.validators import MaxLengthValidator, MinLengthValidator, MinValueValidator
 
 from user.models import User
 from rest_framework import serializers
@@ -155,7 +155,6 @@ class WebtoonContentSerializer(serializers.ModelSerializer):
             for tag in tags:
                 tag_object, created = Tag.objects.get_or_create(content=tag.get('content'))
                 instance.tags.add(tag_object)
-        instance.update_rating()
         instance.save()
         return instance
 
@@ -193,6 +192,9 @@ class EpisodeContentSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'episodeNumber', 'totalRating', 'releasedDate', 'webtoon', 'previousEpisode', 'nextEpisode', 'liking', 'likedBy', 'imageUrl']
         
         read_only_fields = ['totalRating', 'releasedDate', 'previousEpisode', 'nextEpisode', 'liking', 'likedBy']
+        extra_kwargs = {
+            'episodeNumber': {'validators': [MinValueValidator(1)]}
+        }
 
     
     def update(self, instance, validated_data):
@@ -204,7 +206,6 @@ class EpisodeContentSerializer(serializers.ModelSerializer):
         if not isinstance(webtoon, Webtoon):
             instance.webtoon = Webtoon.objects.get(title=webtoon['title'])
         instance.save()
-        instance.webtoon.update_rating()
         return instance
 
     def getPreviousEpisode(self, obj):
