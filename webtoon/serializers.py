@@ -89,7 +89,7 @@ class WebtoonInfoSerializer(serializers.ModelSerializer):
 
 class WebtoonContentSerializer(serializers.ModelSerializer):
     """Webtoon 페이지 안에서의 Serializer"""
-    uploadDays = DayOfWeekSerializer(many=True)
+    uploadDays = DayOfWeekSerializer(many=True, required=False)
     tags = TagSerializer(many=True, required=False)
     author = UserSerializer(read_only = True)
     subscribing = serializers.SerializerMethodField(method_name='isSubscribing', read_only=True)
