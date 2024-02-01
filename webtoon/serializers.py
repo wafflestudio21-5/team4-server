@@ -29,13 +29,6 @@ class TagSerializer(serializers.ModelSerializer):
             'content': {'validators': [MaxLengthValidator(20), MinLengthValidator(1)]}
         }
 
-    # def run_validation(self, data):
-    #     try:
-    #         value = Tag.objects.get(pk=data['content'])
-    #     except:
-    #         value = Tag.objects.create(pk=data['content'])
-    #     return value
-
 
 class RatingSerializer(serializers.ModelSerializer):
     """평점 Serializer"""
@@ -116,15 +109,9 @@ class WebtoonContentSerializer(serializers.ModelSerializer):
         for tag_data in tags:
             tag, created = Tag.objects.get_or_create(content=tag_data['content'])
             tag.webtoons.add(webtoon)
-        # for tag in tags:
-        #     tag.webtoons.add(webtoon)
 
         for uploadDay in uploadDayObjects:
             webtoon.uploadDays.add(uploadDay)
-        # for tag in tags:
-        #     tag.webtoons.add(webtoon)
-        # for day in uploadDays:
-        #     day.webtoons.add(webtoon)
         
         # if "titleImage" in validated_data:
         #     webtoon.titleImage = validated_data["titleImage"]
@@ -195,7 +182,6 @@ class EpisodeContentSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'episodeNumber': {'validators': [MinValueValidator(1)]}
         }
-
     
     def update(self, instance, validated_data):
         for key in validated_data:
@@ -233,7 +219,6 @@ class EpisodeContentSerializer(serializers.ModelSerializer):
 
     def getImageUrl(self, obj):
         return settings.S3_URL + "/img/" + str(obj.webtoon.id) + "/" + str(obj.episodeNumber)
-    
 
 
 class SubscriberUserSerializer(serializers.ModelSerializer):
@@ -274,17 +259,6 @@ class UserProfileContentSerializer(serializers.ModelSerializer):
         return obj.subscribers.count()
 
 
-
-
-# class CommentInfoSerializer(serializers.ModelSerializer):
-#     """Webtoon 페이지에서 보여지는 Comment의 Serializer"""
-#     class Meta:
-#         model = Comment
-#         fields = ['id', 'content', 'dtCreated', 'dtUpdated', 'createdBy']
-#         read_only_fields = ['dtCreated', 'dtUpdated', 'createdBy']
-
-
-
 class CommentContentSerializer(serializers.ModelSerializer):
     """댓글 페이지 안에서의 Serializer"""
     # comments = CommentInfoSerializer(many=True, read_only=True)
@@ -312,56 +286,3 @@ class CommentContentSerializer(serializers.ModelSerializer):
         if not user.is_authenticated:
             return False
         return Like.objects.filter(createdBy=user).filter(comment=obj).filter(isDislike=True).exists()
-
-
-
-
-    # def create(self, validated_data):
-    #     instance = Comment()
-    #     for key in validated_data:
-    #         if key in ['comments', 'likedBy', 'dislikedBy']:
-    #             continue
-    #         setattr(instance, key, validated_data[key])
-    #     likedBy = validated_data.get('likedBy', instance.likedBy)
-    #     if hasattr(likedBy, '__iter__'):
-    #         for user in instance.likedBy.all():
-    #             instance.likedBy.remove(user)
-    #         for user in likedBy:
-    #             print(user)
-    #             instance.likedBy.add(User.objects.get(nickname=user.nickname))
-    #
-    #     dislikedBy = validated_data.get('dislikedBy', instance.dislikedBy)
-    #     if hasattr(dislikedBy, '__iter__'):
-    #         for user in instance.dislikedBy.all():
-    #             instance.dislikedBy.remove(user)
-    #         for user in dislikedBy:
-    #             print(user)
-    #             instance.dislikedBy.add(User.objects.get(nickname=user.nickname))
-    #     instance.save()
-    #     return instance
-
-
-    # def update(self, instance, validated_data):
-    #     for key in validated_data:
-    #         if key in ['comments', 'likedBy', 'dislikedBy']:
-    #             continue
-    #         setattr(instance, key, validated_data[key])
-    #     likedBy = validated_data.get('likedBy', instance.likedBy)
-    #     if hasattr(likedBy, '__iter__'):
-    #         for user in instance.likedBy.all():
-    #             instance.likedBy.remove(user)
-    #         for user in likedBy:
-    #             instance.likedBy.add(User.objects.get(nickname=user.nickname))
-    #
-    #
-    #     dislikedBy = validated_data.get('dislikedBy', instance.dislikedBy)
-    #     if hasattr(dislikedBy, '__iter__'):
-    #         for user in instance.dislikedBy.all():
-    #             instance.dislikedBy.remove(user)
-    #         for user in dislikedBy:
-    #             instance.dislikedBy.add(User.objects.get(nickname=user.nickname))
-    #     instance.save()
-    #     return instance
-    #
-    # def validate(self, data):
-    #     return data
