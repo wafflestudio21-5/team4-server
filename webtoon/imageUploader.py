@@ -17,5 +17,5 @@ class S3ImageUploader:
         )
         i = self.url + "/" + str(uuid.uuid4())
         response = s3_client.upload_fileobj(self.file, settings.AWS_STORAGE_BUCKET_NAME, i)
-        return f'https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{i}'
+        return f'https://{settings.AWS_S3_ACCESS_KEY_ID }.s3.{settings.AWS_S3_SECRET_ACCESS_KEY }.amazonaws.com/{i}'
 
