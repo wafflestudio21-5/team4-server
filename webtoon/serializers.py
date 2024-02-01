@@ -184,10 +184,11 @@ class EpisodeContentSerializer(serializers.ModelSerializer):
     imageDomain = serializers.SerializerMethodField(method_name='getImageDomain', read_only=True)
     imageUrls = serializers.SerializerMethodField(method_name='getImageUrl',read_only=True)
 
-    images = serializers.SerializerMethodField(method_name='getEpisodeImages')
+    images = serializers.SerializerMethodField(method_name='getEpisodeImages', read_only=True)
     class Meta:
         model = Episode
-        fields = ['id', 'title', 'episodeNumber', 'totalRating', 'releasedDate', 'webtoon', 'previousEpisode', 'nextEpisode', 'liking', 'likedBy', 'imageUrls', 'imageDomain', 'imageNumber']
+        fields = ['id', 'title', 'episodeNumber', 'totalRating', 'releasedDate', 'webtoon', 'previousEpisode', 'nextEpisode', 'liking', 'likedBy',
+                 'imageUrls', 'imageDomain', 'imageNumber', 'images']
         
         read_only_fields = ['totalRating', 'releasedDate', 'previousEpisode', 'nextEpisode', 'liking', 'likedBy', 'imageNumber']
         extra_kwargs = {
