@@ -166,7 +166,7 @@ class EpisodeInfoSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'episodeNumber', 'totalRating', 'releasedDate']
         read_only_fields = ['totalRating', 'releasedDate']
 
-class EpisodeImage(serializers.ModelSerializer):
+class EpisodeImageSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(use_url=True)
 
     class Meta:
