@@ -29,13 +29,6 @@ class TagSerializer(serializers.ModelSerializer):
             'content': {'validators': [MaxLengthValidator(20), MinLengthValidator(1)]}
         }
 
-    # def run_validation(self, data):
-    #     try:
-    #         value = Tag.objects.get(pk=data['content'])
-    #     except:
-    #         value = Tag.objects.create(pk=data['content'])
-    #     return value
-
 
 class RatingSerializer(serializers.ModelSerializer):
     """평점 Serializer"""
