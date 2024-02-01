@@ -16,8 +16,7 @@ class S3ImageUploader:
             aws_secret_access_key=settings.S3_SECRET_ACCESS_KEY,
             region_name=settings.AWS_REGION
         )
-        i = self.url #+ "/" + str(uuid.uuid4())
-        response = s3_client.upload_fileobj(self.file, settings.AWS_STORAGE_BUCKET_NAME, i)
+        response = s3_client.upload_fileobj(self.file, settings.AWS_STORAGE_BUCKET_NAME, self.url)
         return f'https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_REGION}.amazonaws.com/{i}'
 
 class S3FileUploader:
@@ -26,24 +25,25 @@ class S3FileUploader:
         self.url = url
 
     def upload(self):
+
         s3_client = boto3.client(
             's3',
             aws_access_key_id=settings.S3_ACCESS_KEY_ID,
             aws_secret_access_key=settings.S3_SECRET_ACCESS_KEY,
             region_name=settings.AWS_REGION
         )
-        cnt = 1
+        
+        cnt = 0
         for file_name in os.listdir(self.file_dir):
             file_instance = open(self.file_dir + '/' + file_name, 'rb')
-            url = self.url + "/" + str(cnt)
+            cnt += 1 
+            url = self.url + "/" + str(cnt) + "." + file_name.split('.')[-1]
             s3_client.upload_fileobj(
                 file_instance,
-                "watoon-bucket", 
+                settings.AWS_STORAGE_BUCKET_NAME, 
                 url, 
                 ExtraArgs={
-                    "ContentType": 'jpg'
-                }
-            )
-            cnt += 1
+                    "ContentType": file_name.split('.')[-1]
+                })
         return cnt
    
