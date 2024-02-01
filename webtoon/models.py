@@ -75,8 +75,6 @@ class Episode(models.Model):
         return str(self.episodeNumber) + '. ' + self.title
 
 
-
-
 class Comment(models.Model):
     """댓글 모델"""
     content = models.CharField(max_length=300)
