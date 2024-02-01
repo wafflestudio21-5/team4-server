@@ -90,8 +90,6 @@ class Episode(models.Model):
         self.imageNumber = s3f.upload()
         self.save()
 
-
-
 class Comment(models.Model):
     """댓글 모델"""
     content = models.CharField(max_length=300)

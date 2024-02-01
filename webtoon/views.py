@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.contrib.contenttypes.models import ContentType
 from django.http import Http404
+from django.db import IntegrityError
 from django.db.models import Subquery, OuterRef
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -72,18 +73,18 @@ class WebtoonAPIView(RetrieveUpdateDestroyAPIView):
 
     # Webtoon이 update 또는 delete 될 때, 만약 대응되는 tag가 하나도 남지 않게 된다면 tag를 delete.
     def perform_update(self, serializer):
+        # 요일 이름 체크
+        if 'uploadDays' in serializer.validated_data:
+            for day in serializer.validated_data.get('uploadDays'):
+                if not isDayName(day.get('name')):
+                    raise Http404("Day name not found")
+
         if 'tags' in serializer.validated_data:
             formerTags = self.get_object().tags.all()
             newTags = serializer.validated_data.get('tags')
             for formerTag in formerTags:
                 if (formerTag not in newTags) and (formerTag.webtoons.count() == 1):
                     formerTag.delete()
-
-        # 요일 이름 체크
-        if 'uploadDays' in serializer.validated_data:
-            for day in serializer.validated_data.get('uploadDays'):
-                if not isDayName(day.get('name')):
-                    raise Http404("Day name not found")
 
         return super().perform_update(serializer)
 
@@ -118,6 +119,14 @@ class EpisodeAPIView(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly, IsEpisodeAuthorOrReadOnly,)
     queryset = Episode.objects.all()
     serializer_class = EpisodeContentSerializer
+
+    def update(self, request, *args, **kwargs):
+        # 에피소드 번호 겹칠 시 400 return
+        try:
+            response = super().update(request, *args, **kwargs)
+        except IntegrityError:
+            return Response({'detail': 'Duplicate episodeNumber'}, status=status.HTTP_400_BAD_REQUEST)
+        return response
 
     def destroy(self, request, *args, **kwargs):
         super().destroy(request, *args, **kwargs)
@@ -275,7 +284,10 @@ class EpisodeListAPIView(APIView, PaginationHandlerMixin):
         kwargs = {'context': self.get_serializer_context()}
         serializer = EpisodeContentSerializer(data = request.data, **kwargs)
         if serializer.is_valid(raise_exception=True):
-            serializer.save(webtoon=webtoon)
+            try:
+                serializer.save(webtoon=webtoon)
+            except IntegrityError:
+                return Response({'detail': 'Duplicate episodeNumber'}, status=status.HTTP_400_BAD_REQUEST)
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
     
