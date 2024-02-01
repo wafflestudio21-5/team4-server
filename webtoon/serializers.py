@@ -10,6 +10,7 @@ from user.serializers import UserSerializer
 
 from rest_framework.exceptions import ValidationError
 from Watoon import settings
+import boto3
 
 
 
