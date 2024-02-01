@@ -209,8 +209,8 @@ class WebtoonListAPIView(APIView, PaginationHandlerMixin):
         return Response(serializer.data)
 
     def post(self, request):
-        if "tags" not in request.data :
-            request.data['tags'] = []
+        #if "tags" not in request.data :
+        #    request.data['tags'] = []
 
         kwargs = {'context': self.get_serializer_context()}
                   
