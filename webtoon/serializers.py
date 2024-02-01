@@ -198,8 +198,8 @@ class EpisodeContentSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         instance = Episode.objects.create(**validated_data)
         image_set = self.context['request'].FILES
-        for image_data in image_set.getlist('image'):
-            PostImage.objects.create(post=instance, image=image_data)
+        for image_data in image_set.getlist('images'):
+            EpisodeImage.objects.create(episode=instance, image=image_data)
         return instance
     
     def update(self, instance, validated_data):
@@ -254,8 +254,8 @@ class EpisodeContentSerializer(serializers.ModelSerializer):
         return file_list
 
     def getEpisodeImages(self, obj):
-        image = obj.image.all() 
-        return EpisodeImageSerializer(instance=image, many=True, context=self.context).data
+        images = obj.images.all() 
+        return EpisodeImageSerializer(instance=images, many=True, context=self.context).data
 
 
 

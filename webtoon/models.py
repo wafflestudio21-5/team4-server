@@ -91,7 +91,7 @@ class Episode(models.Model):
 
 
 class EpisodeImage(models.Model):
-    episode = models.ForeignKey(Episode, on_delete=models.CASCADE, related_name='episode')
+    episode = models.ForeignKey(Episode, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to=image_upload_path)
 
     def __int__(self):
