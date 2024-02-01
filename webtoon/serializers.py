@@ -82,7 +82,7 @@ class WebtoonInfoSerializer(serializers.ModelSerializer):
 
 class WebtoonContentSerializer(serializers.ModelSerializer):
     """Webtoon 페이지 안에서의 Serializer"""
-    uploadDays = DayOfWeekSerializer(many=True)
+    uploadDays = DayOfWeekSerializer(many=True, required=False)
     tags = TagSerializer(many=True, required=False)
     author = UserSerializer(read_only = True)
     subscribing = serializers.SerializerMethodField(method_name='isSubscribing', read_only=True)
@@ -95,8 +95,8 @@ class WebtoonContentSerializer(serializers.ModelSerializer):
         read_only_fields = ['author', 'releasedDate', 'subscribing', 'subscribeCount', 'totalRating', 'episodeCount']
        
     def create(self, validated_data):
-        tags = validated_data.pop('tags')
-        uploadDays = validated_data.pop('uploadDays')
+        tags = validated_data.pop('tags') if 'tags' in validated_data else []
+        uploadDays = validated_data.pop('uploadDays') if 'uploadDays' in validated_data else []
 
         # uploadDay 유효성 체크
         uploadDayObjects = []
@@ -113,8 +113,8 @@ class WebtoonContentSerializer(serializers.ModelSerializer):
         for uploadDay in uploadDayObjects:
             webtoon.uploadDays.add(uploadDay)
         
-        if "titleImage" in validated_data:
-            webtoon.titleImage = validated_data["titleImage"]
+        # if "titleImage" in validated_data:
+        #     webtoon.titleImage = validated_data["titleImage"]
         
         return webtoon
 

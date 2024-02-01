@@ -28,7 +28,7 @@ from .adapter import CustomGoogleOAuth2Adapter
 
 from json.decoder import JSONDecodeError
 from django.http import JsonResponse
-import requests
+import requests, os
 
 sensitive_post_parameters_m = method_decorator(
     sensitive_post_parameters(
@@ -156,7 +156,12 @@ def kakao_callback(request):
         accept_json = accept.json()
         if accept_json['user'] is not None:
             accept_json['user']['nickname'] = user.nickname
-        return JsonResponse(accept_json)
+        response = JsonResponse(accept_json, json_dumps_params={'ensure_ascii': False})
+        response.headers['access'] = accept_json['access']
+        response.set_cookie('access', accept_json['access'])
+        response.headers['refresh'] = accept_json['refresh']
+        response.set_cookie('refresh', accept_json['refresh'])
+        return response
 
     except User.DoesNotExist:
         nickname = request.GET.get("nickname")
@@ -172,7 +177,12 @@ def kakao_callback(request):
         if accept_json['user'] is not None:
             user = User.objects.get(email=accept_json['user']['email'])
             accept_json['user']['nickname'] = user.nickname
-        return JsonResponse(accept_json)
+        response = JsonResponse(accept_json, json_dumps_params={'ensure_ascii': False})
+        response.headers['access'] = accept_json['access']
+        response.set_cookie('access', accept_json['access'])
+        response.headers['refresh'] = accept_json['refresh']
+        response.set_cookie('refresh', accept_json['refresh'])
+        return response
     
     except SocialAccount.DoesNotExist:
         return JsonResponse({'err_msg': 'email exists but not social user'}, status=status.HTTP_400_BAD_REQUEST)
@@ -200,9 +210,8 @@ def google_callback(request):
 
     if error is not None:
         raise JSONDecodeError(error)
-    
-    access_token = token_req_json.get("access_token")
 
+    access_token = token_req_json.get("access_token")
     email_req = requests.post(f"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={access_token}")
     email_req_status = email_req.status_code
     
@@ -237,7 +246,12 @@ def google_callback(request):
         accept_json = accept.json()
         if accept_json['user'] is not None:
             accept_json['user']['nickname'] = user.nickname
-        return JsonResponse(accept_json)
+        response = JsonResponse(accept_json, json_dumps_params={'ensure_ascii': False})
+        response.headers['access'] = accept_json['access']
+        response.set_cookie('access', accept_json['access'])
+        response.headers['refresh'] = accept_json['refresh']
+        response.set_cookie('refresh', accept_json['refresh'])
+        return response
 
     except User.DoesNotExist:    # DoesNotExist -> Django Model에서 기본 지원
         # 전달받은 이메일로 기존에 가입된 유저가 아예 없으면 => 새로 회원가입 & 해당 유저의 jwt 발급
@@ -255,7 +269,12 @@ def google_callback(request):
         if accept_json['user'] is not None:
             user = User.objects.get(email=accept_json['user']['email'])
             accept_json['user']['nickname'] = user.nickname
-        return JsonResponse(accept_json)
+        response = JsonResponse(accept_json, json_dumps_params={'ensure_ascii': False})
+        response.headers['access'] = accept_json['access']
+        response.set_cookie('access', accept_json['access'])
+        response.headers['refresh'] = accept_json['refresh']
+        response.set_cookie('refresh', accept_json['refresh'])
+        return response
 
     except SocialAccount.DoesNotExist:
     	# User는 있는데 SocialAccount가 없을 때 (=일반회원으로 가입된 이메일일때)
@@ -268,8 +287,39 @@ class GoogleLogin(SocialLoginView):
     client_class = OAuth2Client
     
 
-def NickNameVerify(request, nickname):
-    user = User.objects.get(nickname=nickname)
-    if user is None:
-        return JsonResponse({"nickname" : "possible"})
-    return JsonResponse({"nickname": "impossible"})
+def nickname_duplicate_check(request):
+    if request.method != "GET":
+        return JsonResponse({'err': 'request method is not valid'})
+
+    nickname = request.GET.get("nickname")
+    if nickname == "" or nickname is None:
+        return JsonResponse({"err" : "nickname is null"})
+    if User.objects.filter(nickname=nickname).exists():
+        return JsonResponse({"nickname" : "impossible"})
+    return JsonResponse({"nickname": "possible"})
+
+def email_duplicate_check(request):
+    if request.method != "GET":
+        return JsonResponse({'err': 'request method is not valid'})
+
+    email = request.GET.get("email")
+    if email == "" or email is None:
+        return JsonResponse({"err" : "email is null"})
+    if User.objects.filter(email=email).exists():
+        return JsonResponse({"email" : "impossible"})
+    return JsonResponse({"email": "possible"})
+
+
+def create_superuser(request):
+    nickname = "watoon_admin"
+    email = os.getenv("DJANGO_SUPERUSER_EMAIL")
+    password = os.getenv("DJANGO_SUPERUSER_PASSWORD")
+    if not User.objects.filter(email=email).exists():
+        User.objects.create_superuser(
+            email=email, 
+            password=password,
+            nickname=nickname
+        )
+        return JsonResponse({"message": "admin created."})
+    else:
+        return JsonResponse({"message": "already exists."})

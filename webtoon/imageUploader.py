@@ -13,9 +13,9 @@ class S3ImageUploader:
             's3',
             aws_access_key_id=settings.S3_ACCESS_KEY_ID,
             aws_secret_access_key=settings.S3_SECRET_ACCESS_KEY,
-            region_name=settings.AWS_S3_REGION_NAME
+            region_name=settings.AWS_REGION
         )
-        i = self.url + "/" + str(uuid.uuid4())
+        i = self.url #+ "/" + str(uuid.uuid4())
         response = s3_client.upload_fileobj(self.file, settings.AWS_STORAGE_BUCKET_NAME, i)
-        return f'https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{i}'
+        return f'https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_REGION}.amazonaws.com/{i}'
 
