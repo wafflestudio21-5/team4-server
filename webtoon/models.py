@@ -8,6 +8,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from user.models import User
 from .validators import isDayName
 
+from .imageUploader import S3ImageUploader
+
 
 # Create your models here.
 class UserProfile(models.Model):
@@ -68,12 +70,25 @@ class Episode(models.Model):
     # 좋아요, 싫어요
     likedBy = models.PositiveIntegerField(default=0)
 
+    imageNumber = models.IntegerField(default=0)
+
     class Meta:
         unique_together = ['webtoon', 'episodeNumber']
 
     def __str__(self):
         return str(self.episodeNumber) + '. ' + self.title
 
+
+    def uploadImage(self, image):
+        self.imageNumber += 1
+        s3i = S3ImageUploader(image, str(self.webtoon.pk) + "/" + str(self.episodeNumber)+"/"+str(self.imageNumber))
+        s3i.upload()
+        self.save()
+
+    def uploadImages(self, file_dir):
+        s3f = S3FileUploader(file_dir, str(self.webtoon.pk) + "/" + str(self.episodeNumber))
+        self.imageNumber = s3f.upload()
+        self.save()
 
 
 

@@ -176,9 +176,9 @@ class EpisodeContentSerializer(serializers.ModelSerializer):
     imageUrl = serializers.SerializerMethodField(method_name='getImageUrl', read_only=True)
     class Meta:
         model = Episode
-        fields = ['id', 'title', 'episodeNumber', 'totalRating', 'releasedDate', 'webtoon', 'previousEpisode', 'nextEpisode', 'liking', 'likedBy', 'imageUrl']
+        fields = ['id', 'title', 'episodeNumber', 'totalRating', 'releasedDate', 'webtoon', 'previousEpisode', 'nextEpisode', 'liking', 'likedBy', 'imageUrl', 'imageNumber']
         
-        read_only_fields = ['totalRating', 'releasedDate', 'previousEpisode', 'nextEpisode', 'liking', 'likedBy']
+        read_only_fields = ['totalRating', 'releasedDate', 'previousEpisode', 'nextEpisode', 'liking', 'likedBy', 'imageNumber']
         extra_kwargs = {
             'episodeNumber': {'validators': [MinValueValidator(1)]}
         }
@@ -218,7 +218,8 @@ class EpisodeContentSerializer(serializers.ModelSerializer):
         return Like.objects.filter(createdBy=user).filter(episode=obj).exists()
 
     def getImageUrl(self, obj):
-        return settings.S3_URL + "/img/" + str(obj.webtoon.id) + "/" + str(obj.episodeNumber)
+        return settings.S3_URL + "/" + str(obj.webtoon.id) + "/" + str(obj.episodeNumber)
+
 
 
 class SubscriberUserSerializer(serializers.ModelSerializer):
