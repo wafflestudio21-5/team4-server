@@ -225,7 +225,7 @@ class EpisodeContentSerializer(serializers.ModelSerializer):
     def getImageUrl(self, obj):
         s3 = boto3.client('s3', aws_access_key_id=settings.S3_ACCESS_KEY_ID,
             aws_secret_access_key=settings.S3_SECRET_ACCESS_KEY,
-            region_name=settings.AWS_S3_REGION_NAME)
+            region_name=settings.AWS_REGION)
         
         obj_list = s3.list_objects(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Prefix=str(obj.webtoon.id) + "/" + str(obj.episodeNumber) + "/")
         contents_list =  obj_list['Contents']
