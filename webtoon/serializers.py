@@ -102,8 +102,8 @@ class WebtoonContentSerializer(serializers.ModelSerializer):
         read_only_fields = ['author', 'releasedDate', 'subscribing', 'subscribeCount', 'totalRating', 'episodeCount']
        
     def create(self, validated_data):
-        tags = validated_data.pop('tags')
-        uploadDays = validated_data.pop('uploadDays')
+        tags = validated_data.pop('tags') if 'tags' in validated_data else []
+        uploadDays = validated_data.pop('uploadDays') if 'uploadDays' in validated_data else []
 
         # uploadDay 유효성 체크
         uploadDayObjects = []
