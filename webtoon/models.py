@@ -39,7 +39,7 @@ class Webtoon(models.Model):
     isFinished = models.BooleanField(default=False)
     totalRating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
 
-    uploadDays = models.ManyToManyField(DayOfWeek, blank=False, related_name='webtoons')    # 업로드 요일 (복수 선택가능)
+    uploadDays = models.ManyToManyField(DayOfWeek, blank=True, related_name='webtoons')    # 업로드 요일 (복수 선택가능)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='uploadedWebtoons')
     subscribers = models.ManyToManyField(User, blank=True, related_name='subscribingWebtoons')   # 구독자
     releasedDate = models.DateField(auto_now_add=True)
