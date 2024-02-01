@@ -8,7 +8,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from user.models import User
 from .validators import isDayName
 
-from .imageUploader import S3ImageUploader
+from .imageUploader import S3ImageUploader, S3FileUploader
 
 
 # Create your models here.
@@ -78,10 +78,10 @@ class Episode(models.Model):
     def __str__(self):
         return str(self.episodeNumber) + '. ' + self.title
 
-
     def uploadImage(self, image):
         self.imageNumber += 1
-        s3i = S3ImageUploader(image, str(self.webtoon.pk) + "/" + str(self.episodeNumber)+"/"+str(self.imageNumber))
+        s3i = S3ImageUploader(image, str(self.webtoon.pk) + "/" + str(self.episodeNumber)+"/"
+                                    +str(self.imageNumber) + ".jpg")
         s3i.upload()
         self.save()
 
