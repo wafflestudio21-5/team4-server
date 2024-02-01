@@ -5,7 +5,7 @@ from django.core.validators import MaxLengthValidator, MinLengthValidator, MinVa
 from user.models import User
 from rest_framework import serializers
 
-from .models import DayOfWeek, Webtoon, Episode, Comment, Tag, Rating, Like, UserProfile
+from .models import DayOfWeek, Webtoon, Episode, Comment, Tag, Rating, Like, UserProfile, EpisodeImage
 from user.serializers import UserSerializer
 
 from rest_framework.exceptions import ValidationError
@@ -166,6 +166,13 @@ class EpisodeInfoSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'episodeNumber', 'totalRating', 'releasedDate']
         read_only_fields = ['totalRating', 'releasedDate']
 
+class EpisodeImage(serializers.ModelSerializer):
+    image = serializers.ImageField(use_url=True)
+
+    class Meta:
+        model = EpisodeImage
+        fields = ['image']
+
 
 class EpisodeContentSerializer(serializers.ModelSerializer):
     """Episode 페이지 안에서의 Serializer"""
@@ -176,14 +183,23 @@ class EpisodeContentSerializer(serializers.ModelSerializer):
     liking = serializers.SerializerMethodField(method_name='isLiking', read_only=True)
     imageDomain = serializers.SerializerMethodField(method_name='getImageDomain', read_only=True)
     imageUrls = serializers.SerializerMethodField(method_name='getImageUrl',read_only=True)
+
+    images = serializers.SerializerMethodField(method_name='getEpisodeImages')
     class Meta:
         model = Episode
-        fields = ['id', 'title', 'episodeNumber', 'totalRating', 'releasedDate', 'webtoon', 'previousEpisode', 'nextEpisode', 'liking', 'likedBy', 'imageUrls', 'imageDomain']
+        fields = ['id', 'title', 'episodeNumber', 'totalRating', 'releasedDate', 'webtoon', 'previousEpisode', 'nextEpisode', 'liking', 'likedBy', 'imageUrls', 'imageDomain', 'imageNumber']
         
-        read_only_fields = ['totalRating', 'releasedDate', 'previousEpisode', 'nextEpisode', 'liking', 'likedBy']
+        read_only_fields = ['totalRating', 'releasedDate', 'previousEpisode', 'nextEpisode', 'liking', 'likedBy', 'imageNumber']
         extra_kwargs = {
             'episodeNumber': {'validators': [MinValueValidator(1)]}
         }
+
+    def create(self, validated_data):
+        instance = Episode.objects.create(**validated_data)
+        image_set = self.context['request'].FILES
+        for image_data in image_set.getlist('image'):
+            PostImage.objects.create(post=instance, image=image_data)
+        return instance
     
     def update(self, instance, validated_data):
         for key in validated_data:
@@ -235,6 +251,10 @@ class EpisodeContentSerializer(serializers.ModelSerializer):
             file_list.append(key)
         
         return file_list
+
+    def getEpisodeImages(self, obj):
+        image = obj.image.all() 
+        return EpisodeImageSerializer(instance=image, many=True, context=self.context).data
 
 
 

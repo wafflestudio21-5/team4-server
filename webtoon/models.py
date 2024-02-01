@@ -4,7 +4,7 @@ from django.dispatch import receiver
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.core.validators import MaxValueValidator, MinValueValidator
-
+from .utils import image_upload_path
 from user.models import User
 from .validators import isDayName
 
@@ -57,7 +57,6 @@ class Episode(models.Model):
     title = models.CharField(max_length=50)
     episodeNumber = models.IntegerField()                                # 회차 번호
     thumbnail = models.ImageField(upload_to="thumbnail/", default="thumbnail/default.jpg")
-    #content = models.ImageField()
 
     totalRating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
     releasedDate = models.DateField(auto_now_add=True)
@@ -89,6 +88,14 @@ class Episode(models.Model):
         s3f = S3FileUploader(file_dir, str(self.webtoon.pk) + "/" + str(self.episodeNumber))
         self.imageNumber = s3f.upload()
         self.save()
+
+
+class EpisodeImage(models.Model):
+    episode = models.ForeignKey(Episode, on_delete=models.CASCADE, related_name='episode')
+    image = models.ImageField(upload_to=image_upload_path)
+
+    def __int__(self):
+        return self.id
 
 class Comment(models.Model):
     """댓글 모델"""
