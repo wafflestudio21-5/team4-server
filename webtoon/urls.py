@@ -24,8 +24,8 @@ from .views import (WebtoonAPIView,
                     UserProfileAPIView,
                     AuthorSubscribeAPIView,
                     SubscribeAuthorListAPIView,
-                    EpisodeThumnailAPIView,
-                    WebtoonTitleImageAPIView,
+                    #EpisodeThumnailAPIView,
+                    #WebtoonTitleImageAPIView,
                    )
 
 urlpatterns = [
