@@ -46,4 +46,27 @@ class S3FileUploader:
                     "ContentType": file_name.split('.')[-1]
                 })
         return cnt
-   
+
+
+
+class S3ImagesUploader:
+    def __init__(self, url=""):
+        self.s3_client = boto3.client(
+            's3',
+            aws_access_key_id=settings.S3_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.S3_SECRET_ACCESS_KEY,
+            region_name=settings.AWS_REGION
+        )
+        self.url = url
+
+    def upload(self, file_dir, file_name ):        
+        file_instance = open(file_dir + "/" + file_name, 'rb')
+        url = self.url + "/" + file_name
+        self.s3_client.upload_fileobj(
+            file_instance,
+            settings.AWS_STORAGE_BUCKET_NAME, 
+            url, 
+            ExtraArgs={
+                "ContentType": file_name.split('.')[-1]
+            })
+        return f'https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_REGION}.amazonaws.com/{url}'

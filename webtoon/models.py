@@ -7,8 +7,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from .utils import image_upload_path, titleImage_upload_path, thumbnail_upload_path
 from user.models import User
 from .validators import isDayName
-import uuid
-from .imageUploader import S3ImageUploader, S3FileUploader
+import uuid, os
+from .imageUploader import S3ImageUploader, S3FileUploader, S3ImagesUploader
 
 
 # Create your models here.
@@ -51,6 +51,7 @@ class Webtoon(models.Model):
         return self.title
 
 
+
 class Episode(models.Model):
     """회차 모델"""
     title = models.CharField(max_length=50)
@@ -68,26 +69,19 @@ class Episode(models.Model):
     # 좋아요, 싫어요
     likedBy = models.PositiveIntegerField(default=0)
 
-    imageNumber = models.IntegerField(default=0)
-
     class Meta:
         unique_together = ['webtoon', 'episodeNumber']
 
     def __str__(self):
         return str(self.episodeNumber) + '. ' + self.title
 
-    def uploadImage(self, image):
-        self.imageNumber += 1
-        s3i = S3ImageUploader(image, str(self.webtoon.pk) + "/" + str(self.episodeNumber)+"/"
-                                    +str(self.imageNumber) + ".jpg")
-        s3i.upload()
-        self.save()
-
     def uploadImages(self, file_dir):
-        s3f = S3FileUploader(file_dir, str(self.webtoon.pk) + "/" + str(self.episodeNumber))
-        self.imageNumber = s3f.upload()
-        self.save()
-
+        s3is = S3ImagesUploader("img/episode/" + str(self.pk) )
+        for file_name in os.listdir(file_dir):
+            url = s3is.upload(file_dir, file_name)
+            print(url)
+            epi = EpisodeImage.objects.create(episode = self, image=url)
+            epi.save()
 
 class EpisodeImage(models.Model):
     episode = models.ForeignKey(Episode, on_delete=models.CASCADE, related_name='images')
