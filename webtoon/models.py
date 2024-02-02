@@ -50,6 +50,13 @@ class Webtoon(models.Model):
     def __str__(self):
         return self.title
 
+    def save(self, *args, **kwargs):
+      if self.id is None:
+          temp_image = self.titleImage
+          self.titleImage = None
+          super().save(*args, **kwargs)
+          self.titleImage = temp_image
+      super().save(*args, **kwargs)
 
 
 class Episode(models.Model):
@@ -89,6 +96,13 @@ class Episode(models.Model):
         self.imageNumber = s3f.upload()
         self.save()
 
+    def save(self, *args, **kwargs):
+        if self.id is None:
+            temp_image = self.thumbnail
+            self.thumbnail = None
+            super().save(*args, **kwargs)
+            self.thumbnail = temp_image
+        super().save(*args, **kwargs)
 
 class EpisodeImage(models.Model):
     episode = models.ForeignKey(Episode, on_delete=models.CASCADE, related_name='images')
