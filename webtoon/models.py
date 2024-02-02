@@ -44,7 +44,7 @@ class Webtoon(models.Model):
     uploadDays = models.ManyToManyField(DayOfWeek, blank=True, related_name='webtoons')    # 업로드 요일 (복수 선택가능)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='uploadedWebtoons')
     subscribers = models.ManyToManyField(User, blank=True, related_name='subscribingWebtoons')   # 구독자
-    releasedDate = models.DateTimeField()
+    releasedDate = models.DateTimeField(auto_now_add=True)
 
 
     def __str__(self):
