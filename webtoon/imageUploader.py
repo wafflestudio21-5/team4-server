@@ -69,4 +69,4 @@ class S3ImagesUploader:
             ExtraArgs={
                 "ContentType": file_name.split('.')[-1]
             })
-        return f'https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_REGION}.amazonaws.com/{url}'
+        return f'https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_REGION}.amazonaws.com/', url

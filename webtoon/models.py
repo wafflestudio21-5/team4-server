@@ -76,10 +76,10 @@ class Episode(models.Model):
         return str(self.episodeNumber) + '. ' + self.title
 
     def uploadImages(self, file_dir):
+        EpisodeImage.objects.filter(episode=self).delete()
         s3is = S3ImagesUploader("img/episode/" + str(self.pk) )
         for file_name in os.listdir(file_dir):
-            url = s3is.upload(file_dir, file_name)
-            print(url)
+            domain, url = s3is.upload(file_dir, file_name)
             epi = EpisodeImage.objects.create(episode = self, image=url)
             epi.save()
 
