@@ -35,7 +35,6 @@ class DayOfWeek(models.Model):
 
 class Webtoon(models.Model):
     """웹툰 모델"""
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=50)
     titleImage = models.ImageField(upload_to=titleImage_upload_path, default="titleImage/default.jpg")
     description = models.CharField(max_length=200)
@@ -54,7 +53,6 @@ class Webtoon(models.Model):
 
 class Episode(models.Model):
     """회차 모델"""
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=50)
     episodeNumber = models.IntegerField()                                # 회차 번호
     thumbnail = models.ImageField(upload_to=thumbnail_upload_path, default="thumbnail/default.jpg")
