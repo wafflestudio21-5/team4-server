@@ -31,6 +31,7 @@ from .serializers import (WebtoonContentSerializer,
                           LikeSerializer,
                           UserInfoSerializer,
                           UserProfileContentSerializer,
+                          WebtoonTitleImageSerializer,
                           )
 from .permissions import (IsAuthorOrReadOnly,
                           IsWebtoonAuthorOrReadOnly,
@@ -64,6 +65,14 @@ def annotateLatestUploadDate(queryset):
 
 
 # Create your views here.
+#class EpisodeThumnailAPIView(APIView):
+#    permission_classes = [IsAuthenticated, IsEpisodeWebtoonAuthorOrReadOnly]
+#    serializer_class = WebtoonContentSerializer
+
+class WebtoonTitleImageAPIView(RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated, IsEpisodeWebtoonAuthorOrReadOnly]
+    queryset = Webtoon.objects.all()
+    serializer_class = WebtoonTitleImageSerializer
 
 # Webtoon 하나하나를 보여주는 View
 class WebtoonAPIView(RetrieveUpdateDestroyAPIView):
