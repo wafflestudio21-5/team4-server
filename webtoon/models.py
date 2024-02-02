@@ -59,7 +59,7 @@ class Episode(models.Model):
     thumbnail = models.ImageField(upload_to="thumbnail/", default="thumbnail/default.jpg")
 
     totalRating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
-    releasedDate = models.DateField(auto_now_add=True)
+    releasedDate = models.DateTimeField()
 
     webtoon = models.ForeignKey(Webtoon, on_delete=models.CASCADE, related_name='episodes')
 
