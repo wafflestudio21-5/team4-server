@@ -163,7 +163,7 @@ class EpisodeInfoSerializer(serializers.ModelSerializer):
     """Webtoon 페이지에서 보여지는 Episode의 Serializer"""
     class Meta:
         model = Episode
-        fields = ['id', 'title', 'episodeNumber', 'totalRating', 'releasedDate']
+        fields = ['id', 'title', 'episodeNumber', 'totalRating', 'releasedDate', 'thumbnail']
         read_only_fields = ['totalRating', 'releasedDate']
 
 class EpisodeImageSerializer(serializers.ModelSerializer):
