@@ -245,12 +245,11 @@ class EpisodeContentSerializer(serializers.ModelSerializer):
             region_name=settings.AWS_REGION)
         
         obj_list = s3.list_objects(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Prefix=str(obj.webtoon.id) + "/" + str(obj.episodeNumber) + "/")
-        contents_list =  obj_list['Contents']
+        contents_list =  obj_list['Contents'] if 'Contents' in obj_list else []
         file_list = []
         for content in contents_list : 
             key = content['Key']
             file_list.append(key)
-        
         return file_list
 
     def getEpisodeImages(self, obj):
