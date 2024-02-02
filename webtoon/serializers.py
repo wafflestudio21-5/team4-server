@@ -7,7 +7,7 @@ from rest_framework import serializers
 
 from .models import DayOfWeek, Webtoon, Episode, Comment, Tag, Rating, Like, UserProfile, EpisodeImage
 from user.serializers import UserSerializer
-
+from .paginations import EpisodeImageCursorPagination
 from rest_framework.exceptions import ValidationError
 from Watoon import settings
 import boto3
@@ -241,9 +241,8 @@ class EpisodeContentSerializer(serializers.ModelSerializer):
         return Like.objects.filter(createdBy=user).filter(episode=obj).exists()
 
     def getEpisodeImages(self, obj):
-        images = obj.images.all() 
+        images = obj.images.all()[:10]
         return EpisodeImageSerializer(instance=images, many=True, context=self.context).data
-
 
 
 class SubscriberUserSerializer(serializers.ModelSerializer):

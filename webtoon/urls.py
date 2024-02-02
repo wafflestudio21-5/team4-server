@@ -26,6 +26,7 @@ from .views import (WebtoonAPIView,
                     SubscribeAuthorListAPIView,
                     #EpisodeThumnailAPIView,
                     WebtoonTitleImageAPIView,
+                    EpisodeImageListAPIView,
                    )
 
 urlpatterns = [
@@ -57,6 +58,7 @@ urlpatterns = [
     path('api/episode/<int:pk>/like', EpisodeLikeAPIView.as_view()), 
     path('api/comment/<int:pk>/like', CommentLikeAPIView.as_view()), 
 
+    path('api/episode/<int:pk>/images', EpisodeImageListAPIView.as_view()),
     # 임시 엔드포인트
     # path('api/dayofweek', DayOfWeekCreateAPIView.as_view())
 ]

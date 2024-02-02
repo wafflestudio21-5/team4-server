@@ -40,6 +40,10 @@ class WebtoonCursorPagination(CursorPagination):
     ordering = '-id'
 
 
+class EpisodeImageCursorPagination(CursorPagination):
+    page_size = 10
+    ordering = 'id'
+
 class EpisodeCursorPagination(CursorPagination):
     page_size = 15
     ordering = ['-episodeNumber']
