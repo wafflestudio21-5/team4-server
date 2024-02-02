@@ -18,7 +18,7 @@ from django.contrib.contenttypes.models import ContentType
 
 from user.models import User
 
-from .models import Webtoon, Comment, DayOfWeek, Episode, Tag, UserProfile, Rating, Like
+from .models import Webtoon, Comment, DayOfWeek, Episode, Tag, UserProfile, Rating, Like, EpisodeImage
 from .serializers import (WebtoonContentSerializer,
                           WebtoonInfoSerializer,
                           WebtoonContentSerializer,
@@ -32,6 +32,7 @@ from .serializers import (WebtoonContentSerializer,
                           UserInfoSerializer,
                           UserProfileContentSerializer,
                           WebtoonTitleImageSerializer,
+                          EpisodeImageSerializer,
                           )
 from .permissions import (IsAuthorOrReadOnly,
                           IsWebtoonAuthorOrReadOnly,
@@ -47,6 +48,7 @@ from .paginations import (CommentCursorPagination,
                           WebtoonCursorPagination,
                           PaginationHandlerMixin,
                           EpisodeCursorPagination,
+                          EpisodeImageCursorPagination,
                           )
 
 from .imageUploader import S3ImageUploader
@@ -259,6 +261,19 @@ class DayWebtoonListAPIView(generics.ListAPIView):
         day = get_object_or_404(DayOfWeek, name=self.kwargs.get('day'))
         queryset = Webtoon.objects.filter(uploadDays=day)
         # return orderByLatestEpisode(queryset)
+        return queryset
+
+class EpisodeImageListAPIView(generics.ListAPIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    serializer_class = EpisodeImageSerializer
+    pagination_class = EpisodeImageCursorPagination
+
+    def getEpisode(self, pk):
+        return get_object_or_404(Episode, pk=pk)
+
+    def get_queryset(self):
+        ep = self.getEpisode(self.kwargs.get('pk'))
+        queryset = EpisodeImage.objects.filter(episode=ep)
         return queryset
 
 
