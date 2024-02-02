@@ -7,7 +7,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from .utils import image_upload_path, titleImage_upload_path, thumbnail_upload_path
 from user.models import User
 from .validators import isDayName
-
+import uuid
 from .imageUploader import S3ImageUploader, S3FileUploader
 
 
@@ -35,6 +35,7 @@ class DayOfWeek(models.Model):
 
 class Webtoon(models.Model):
     """웹툰 모델"""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=50)
     titleImage = models.ImageField(upload_to=titleImage_upload_path, default="titleImage/default.jpg")
     description = models.CharField(max_length=200)
@@ -50,17 +51,10 @@ class Webtoon(models.Model):
     def __str__(self):
         return self.title
 
-    def save(self, *args, **kwargs):
-      if self.id is None:
-          temp_image = self.titleImage
-          self.titleImage = None
-          super().save(*args, **kwargs)
-          self.titleImage = temp_image
-      super().save(*args, **kwargs)
-
 
 class Episode(models.Model):
     """회차 모델"""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=50)
     episodeNumber = models.IntegerField()                                # 회차 번호
     thumbnail = models.ImageField(upload_to=thumbnail_upload_path, default="thumbnail/default.jpg")
@@ -96,13 +90,6 @@ class Episode(models.Model):
         self.imageNumber = s3f.upload()
         self.save()
 
-    def save(self, *args, **kwargs):
-        if self.id is None:
-            temp_image = self.thumbnail
-            self.thumbnail = None
-            super().save(*args, **kwargs)
-            self.thumbnail = temp_image
-        super().save(*args, **kwargs)
 
 class EpisodeImage(models.Model):
     episode = models.ForeignKey(Episode, on_delete=models.CASCADE, related_name='images')
