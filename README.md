@@ -56,7 +56,7 @@
 
 
 ## 💳라이센스
-Distributed under the MIT License. See LICENSE for more information.
+This project is licensed under the terms of the MIT license. See LICENSE for more information.
 
 ## 🐈‍⬛Reference
 This app is copy project of already existing app, [Naver Webtoon].
