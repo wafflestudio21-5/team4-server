@@ -7,13 +7,9 @@
 
 * * *
 
-## 목차
-[와툰 소개](#🧚‍♀️와툰을-소개합니다!)
-
-* * *
-
 ## 🧚‍♀️와툰을 소개합니다!
-대충 서비스 소개하는 내용
+아마추어부터 프로까지, 모든 창작자들의 낙원: 와툰 👼
+와툰 [바로가기]
 
 * * *
 
@@ -67,3 +63,4 @@ This project is licensed under the terms of the MIT license. See LICENSE for mor
 This app is copy project of already existing app, [Naver Webtoon].
 
 [Naver Webtoon]: https://play.google.com/store/apps/details?id=com.nhn.android.webtoon&pcampaignid=web_share
+[바로가기]: #TODO
