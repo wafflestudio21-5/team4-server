@@ -187,16 +187,14 @@ class EpisodeContentSerializer(serializers.ModelSerializer):
     previousEpisode = serializers.SerializerMethodField(method_name='getPreviousEpisode', read_only=True)
     nextEpisode = serializers.SerializerMethodField(method_name='getNextEpisode', read_only=True)
     liking = serializers.SerializerMethodField(method_name='isLiking', read_only=True)
-    imageDomain = serializers.SerializerMethodField(method_name='getImageDomain', read_only=True)
-    imageUrls = serializers.SerializerMethodField(method_name='getImageUrl',read_only=True)
 
     images = serializers.SerializerMethodField(method_name='getEpisodeImages')
     class Meta:
         model = Episode
         fields = ['id', 'title', 'episodeNumber', 'totalRating', 'releasedDate', 'webtoon', 'previousEpisode', 'nextEpisode', 'liking', 'likedBy', 'thumbnail',
-                 'imageUrls', 'imageDomain', 'imageNumber', 'images']
+                 'images']
         
-        read_only_fields = ['totalRating', 'releasedDate', 'previousEpisode', 'nextEpisode', 'liking', 'likedBy', 'imageNumber']
+        read_only_fields = ['totalRating', 'releasedDate', 'previousEpisode', 'nextEpisode', 'liking', 'likedBy']
         extra_kwargs = {
             'episodeNumber': {'validators': [MinValueValidator(1)]}
         }
@@ -241,22 +239,6 @@ class EpisodeContentSerializer(serializers.ModelSerializer):
         if not user.is_authenticated:
             return False
         return Like.objects.filter(createdBy=user).filter(episode=obj).exists()
-
-    def getImageDomain(self, obj):
-        return settings.S3_URL #+ "/" + str(obj.webtoon.id) + "/" + str(obj.episodeNumber)
-
-    def getImageUrl(self, obj):
-        s3 = boto3.client('s3', aws_access_key_id=settings.S3_ACCESS_KEY_ID,
-            aws_secret_access_key=settings.S3_SECRET_ACCESS_KEY,
-            region_name=settings.AWS_REGION)
-        
-        obj_list = s3.list_objects(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Prefix=str(obj.webtoon.id) + "/" + str(obj.episodeNumber) + "/")
-        contents_list =  obj_list['Contents'] if 'Contents' in obj_list else []
-        file_list = []
-        for content in contents_list : 
-            key = content['Key']
-            file_list.append(key)
-        return file_list
 
     def getEpisodeImages(self, obj):
         images = obj.images.all() 
