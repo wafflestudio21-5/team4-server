@@ -4,7 +4,7 @@ from django.dispatch import receiver
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.core.validators import MaxValueValidator, MinValueValidator
-from .utils import image_upload_path
+from .utils import image_upload_path, titleImage_upload_path, thumbnail_upload_path
 from user.models import User
 from .validators import isDayName
 
@@ -36,7 +36,7 @@ class DayOfWeek(models.Model):
 class Webtoon(models.Model):
     """웹툰 모델"""
     title = models.CharField(max_length=50)
-    titleImage = models.ImageField(upload_to="tileImage/", default="titleImage/default.jpg")
+    titleImage = models.ImageField(upload_to=titleImage_upload_path, default="titleImage/default.jpg")
     description = models.CharField(max_length=200)
     isFinished = models.BooleanField(default=False)
     totalRating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
@@ -56,7 +56,7 @@ class Episode(models.Model):
     """회차 모델"""
     title = models.CharField(max_length=50)
     episodeNumber = models.IntegerField()                                # 회차 번호
-    thumbnail = models.ImageField(upload_to="thumbnail/", default="thumbnail/default.jpg")
+    thumbnail = models.ImageField(upload_to=thumbnail_upload_path, default="thumbnail/default.jpg")
 
     totalRating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
     releasedDate = models.DateField(auto_now_add=True)
