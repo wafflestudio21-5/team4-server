@@ -159,6 +159,12 @@ class WebtoonContentSerializer(serializers.ModelSerializer):
         return obj.episodes.count()
 
 
+class WebtoonTitleImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Webtoon
+        fields = ['id',  'titleImage']
+
+
 class EpisodeInfoSerializer(serializers.ModelSerializer):
     """Webtoon 페이지에서 보여지는 Episode의 Serializer"""
     class Meta:

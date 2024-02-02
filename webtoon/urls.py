@@ -25,7 +25,7 @@ from .views import (WebtoonAPIView,
                     AuthorSubscribeAPIView,
                     SubscribeAuthorListAPIView,
                     #EpisodeThumnailAPIView,
-                    #WebtoonTitleImageAPIView,
+                    WebtoonTitleImageAPIView,
                    )
 
 urlpatterns = [
@@ -35,7 +35,7 @@ urlpatterns = [
     path('api/webtoonList/search', WebtoonSearchView.as_view()),
     path('api/webtoonList/<str:day>', DayWebtoonListAPIView.as_view()),
     path('api/webtoon/<int:pk>', WebtoonAPIView.as_view()), 
-    #path('api/webtoon/<int:pk>/titleImage', WebtoonTitleImageAPIView.as_view()), 
+    path('api/webtoon/<int:pk>/titleImage', WebtoonTitleImageAPIView.as_view()), 
     path('api/webtoon/<int:pk>/episode', EpisodeListAPIView.as_view()),
     path('api/webtoon/<int:pk>/subscribe', WebtoonSubscribeAPIView.as_view()),
     path('api/episode/<int:pk>', EpisodeAPIView.as_view()), 
