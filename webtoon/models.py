@@ -35,7 +35,7 @@ class DayOfWeek(models.Model):
 
 class Webtoon(models.Model):
     """웹툰 모델"""
-    title = models.CharField(max_length=50)
+    title = models.CharField(max_length=50, unique=True)
     titleImage = models.ImageField(upload_to=titleImage_upload_path, default="titleImage/default.jpg")
     description = models.CharField(max_length=200)
     isFinished = models.BooleanField(default=False)
