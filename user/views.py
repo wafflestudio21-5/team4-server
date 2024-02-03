@@ -287,21 +287,19 @@ class GoogleLogin(SocialLoginView):
     client_class = OAuth2Client
     
 
-def nickname_duplicate_check(request):
-    if request.method != "POST":
-        return JsonResponse({'err': 'request method is not valid'})
-
-    nickname = request.POST.get('nickname')
-    if User.objects.filter(nickname=nickname).exists():
-        return JsonResponse({'err': 'nickname already exists!'})
-    else:
-        user = request.user
-        if user is None:
-            return JsonResponse({'err': 'invalid user'})
+class NicknameChangeView(APIView):
+    def post(self, request):
+        nickname = request.POST.get('nickname')
+        if User.objects.filter(nickname=nickname).exists():
+            return JsonResponse({'err': 'nickname already exists!'})
         else:
-            user.nickname = nickname
-            user.save()
-            return JsonResponse({'nickname': 'changed'})
+            user = request.user
+            if user is None:
+                return JsonResponse({'err': 'invalid user'})
+            else:
+                user.nickname = nickname
+                user.save()
+                return JsonResponse({'nickname': 'changed'})
 
 
 def email_duplicate_check(request):
