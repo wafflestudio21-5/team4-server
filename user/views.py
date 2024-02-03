@@ -300,6 +300,7 @@ def nickname_duplicate_check(request):
             return JsonResponse({'err': 'invalid user'})
         else:
             user.nickname = nickname
+            user.save()
             return JsonResponse({'nickname': 'changed'})
 
 
