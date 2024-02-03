@@ -67,6 +67,11 @@
 
 <img src="./blacklogo.jpg" width=200px>
 
+## Urls
+아래 swagger에 endpoint 목록이 나와있습니다.
+
+[Swagger](http://watoon-env1.eba-ytauqqvt.ap-northeast-2.elasticbeanstalk.com/swagger/)
+
 * * *
 
 ## 👷컨벤션
