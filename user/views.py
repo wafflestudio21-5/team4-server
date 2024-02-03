@@ -291,15 +291,15 @@ class NicknameChangeView(APIView):
     def post(self, request):
         nickname = request.data['nickname']
         if User.objects.filter(nickname=nickname).exists():
-            return Response({'err': 'nickname already exists!'}, status=400)
+            return Response(status=400)
         else:
             user = request.user
             if user is None:
-                return Response({'err': 'invalid user'}, status=400)
+                return Response(status=400)
             else:
                 user.nickname = nickname
                 user.save()
-                return Response({'nickname': 'changed'}, status=201)
+                return Response(status=201)
 
 
 def email_duplicate_check(request):
