@@ -419,7 +419,12 @@ class EpisodeRatingAPIView(generics.RetrieveUpdateDestroyAPIView):
         
         #webtoon의 totalRating 계산
         webtoon = ratingOn.webtoon
-        episodes = Episode.objects.filter(webtoon=webtoon)
+
+        rating_exists = Exists(Rating.objects.filter(ratingOn_id=OuterRef('pk')))
+        episodes = Episode.objects.annotate(
+            rating_exists=rating_exists
+        ).filter(webtoon=webtoon).filter(rating_exists=True)
+
         totalRating = 0.0
         for episode in episodes:
             totalRating += float(episode.totalRating)
