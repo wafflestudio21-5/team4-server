@@ -1,33 +1,89 @@
-# team4-server
+<div align="center">
+  <img src="./blacklogo.jpg" width=300px>
 
-## github-action 관련
-team4-server -> Watoon(프로젝트) -> Watoon(앱) 방식으론 자동으로 배포가 안됨!
-team4-server -> Watoon, User..(앱)으로 구성되어있어야 배포가 제대로 됨.
+  ✨*수많은 다른 세계*✨를 만날 수 있는 곳, **와툰** :stars:
 
-team4-server에서 상단에 settings 탭 - Secrets and variables - Action에서 repository secrets 추가하기
+</div>
 
-여기서 AWS_ACCESS_KEY_ID와 AWS_SECRET_ACCESS_KEY 추가 필요(실제 배포하는 사람의 것)
+* * *
 
-이후 .github/workflows/deploy.yml에서 secrets.AWS_ACCESS_KEY_ID_jsh 변수 이름을 secrets에 등록한 변수 이름으로 바꿔주기
+# 🧚‍♀️와툰을 소개합니다!
+아마추어부터 프로까지, 모든 창작자들의 낙원: 와툰 👼
 
-+ aws에서 미리 어플리케이션과 환경을 생성한 후, deploy 파일에 application_name과 environment_name을 자신의 것으로 맞춰 기재하기
+와툰 [다운로드]
 
-## 소셜 로그인 관련
-### 구글
-구글 api에서 웹 어플리케이션으로 등록, client id랑 secret 알아내서 github에 secret key로 등록시키기. 이후 workfile에 create .env file쪽에 관련 내용 추가 필요
+* * *
 
-추가로 "승인된 리디렉션 url"에 사이트/accounts/google/callback 추가해야 함
+## 💻Contributors
 
-프론트와 협업 관련 글
-https://velog.io/@hnnynh/OAuth-2.0과-Django의-구글-소셜로그인
+|김하늘|남기태|이수인|이현오|장하경|정시훈|최유찬|
+|:----:|:----:|:----:|:----:|:----:|:----:|:----:|
+|<img src="https://avatars.githubusercontent.com/u/84558752?v=4" width="100" height="100"/>|<img src="https://avatars.githubusercontent.com/u/113081855?v=4" width="100" height="100"/>|<img src="https://avatars.githubusercontent.com/u/102849003?v=4" width="100" height="100"/>|<img src="https://avatars.githubusercontent.com/u/80934056?v=4" width="100" height="100"/>|<img src="https://avatars.githubusercontent.com/u/107039705?v=4" width="100" height="100"/>|<img src="https://avatars.githubusercontent.com/u/66393246?v=4" width="100" height="100"/>|<img src="https://avatars.githubusercontent.com/u/107039705?v=4" width="100" height="100"/>|
+|프론트엔드|프론트엔드|백엔드|백엔드|백엔드|백엔드|백엔드|
+|[kimhaneal11](https://github.com/kimhaneal11)|[kevin990222](https://github.com/kevin990222)|[silee1103](https://github.com/silee1103)|[hyunoh604](https://github.com/hyunoh604)|[paul-4722](https://github.com/paul-4722)|[20222-sh](https://github.com/20222-sh)|[gs20118](https://github.com/gs20118)|
 
-### 카카오
-https://velog.io/@yevini118/Django-allauth-카카오-로그인하기
+## 🗃️사용스펙
+<img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white">
+
+#### 프론트엔드
+<img src="https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white"> <img src="https://img.shields.io/badge/Android Studio-3DDC84?style=for-the-badge&logo=android studio&logoColor=white"> <img src="https://img.shields.io/badge/Android-34A853?style=for-the-badge&logo=android&logoColor=white"> <img src="https://img.shields.io/badge/Jetpack Compose-4285F4?style=for-the-badge&logo=jetpack compose&logoColor=white"> 
+
+*TODO*
+
+#### 백엔드
+<img src="https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=Django&logoColor=white"> <img src="https://img.shields.io/badge/python-3776AB?style=for-the-badge&logo=python&logoColor=white"> <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white"> <img src="https://img.shields.io/badge/Github Actions-2088FF?style=for-the-badge&logo=github actions&logoColor=white"> <img src="https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=white"> <img src="https://img.shields.io/badge/Json Web Tokens-000000?style=for-the-badge&logo=json web tokens&logoColor=white">
+<img src="https://img.shields.io/badge/Amazon AWS-232F3E?style=for-the-badge&logo=amazon aws&logoColor=white"> <img src="https://img.shields.io/badge/Amazon EC2-FF9900?style=for-the-badge&logo=amazon ec2&logoColor=white"> <img src="https://img.shields.io/badge/Amazon RDS-527FFF?style=for-the-badge&logo=amazon rds&logoColor=white"> <img src="https://img.shields.io/badge/Amazon S3-569A31?style=for-the-badge&logo=amazon s3&logoColor=white"> <img src="https://img.shields.io/badge/Amazon Route 53-FF9900?style=for-the-badge&logo=amazon route 53&logoColor=white">
+
+* * *
+
+## 📽️프로젝트 뷰
+#### 1. 메인 페이지
+설명
+
+<img src="./blacklogo.jpg" width=200px>
+
+#### 2. 회원가입 페이지
+설명
+
+<img src="./blacklogo.jpg" width=200px>
+
+#### 3. 로그인 페이지
+설명
+
+<img src="./blacklogo.jpg" width=200px>
+
+#### 4. 요일별 웹툰 페이지
+설명
+
+<img src="./blacklogo.jpg" width=200px>
+
+#### 5. 웹툰 상세 페이지
+설명
+
+<img src="./blacklogo.jpg" width=200px>
+
+#### 6. 마이 페이지
+설명
+
+<img src="./blacklogo.jpg" width=200px>
+
+## Urls
+아래 swagger에 endpoint 목록이 나와있습니다.
+
+[Swagger](http://watoon-env1.eba-ytauqqvt.ap-northeast-2.elasticbeanstalk.com/swagger/)
+
+* * *
+
+## 👷컨벤션
+- pr 스스로 merge 금지
+- commit은 가능한 한 자세히 기입
 
 
-+ 앱 아이콘 등록 후 비즈앱 전환 해야 이메일 얻기 가능
+## 💳라이센스
+This project is licensed under the terms of the MIT license. See LICENSE for more information.
 
-+ 테스트할때 자신의 컴퓨터 ip를 허용 ip에 놓기
-+ 
-2024-01-12 View 1차 구현
- - user와 webtoon 앱의 migration이 각각 작동해서 실제 migration 하실 때 user것 먼저, 그 다음에 webtoon 것으로 해야 할 것 같습니다. 이유는 잘 모르겠지만 추후 수정하겠습니다. 
+## 🐈‍⬛Reference
+This app is copy project of already existing app, [Naver Webtoon].
+
+[Naver Webtoon]: https://play.google.com/store/apps/details?id=com.nhn.android.webtoon&pcampaignid=web_share
+[다운로드]: #TODO
