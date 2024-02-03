@@ -37,7 +37,7 @@
 
 ## 📽️ 프로젝트 뷰
 #### 1. 회원가입 페이지
-    이메일주소, 비밀번호, 닉네임 입력 후 메일로 이메일 인증을 완료하면 회원가입이 완료됩니다.
+이메일주소, 비밀번호, 닉네임 입력 후 메일로 이메일 인증을 완료하면 회원가입이 완료됩니다.
 
 <img src="./image/signup.jpg" width=300px>
 
@@ -118,4 +118,4 @@ This project is licensed under the terms of the MIT license. See LICENSE for mor
 This app is copy project of already existing app, [Naver Webtoon].
 
 [Naver Webtoon]: https://play.google.com/store/apps/details?id=com.nhn.android.webtoon&pcampaignid=web_share
-[다운로드]: #TODO
+[다운로드]: https://drive.google.com/file/d/17QcQGb6mTG3qF9WCVzLULDwNLD-ki-id/view?usp=drive_link
