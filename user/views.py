@@ -288,15 +288,20 @@ class GoogleLogin(SocialLoginView):
     
 
 def nickname_duplicate_check(request):
-    if request.method != "GET":
+    if request.method != "POST":
         return JsonResponse({'err': 'request method is not valid'})
 
-    nickname = request.GET.get("nickname")
-    if nickname == "" or nickname is None:
-        return JsonResponse({"err" : "nickname is null"})
+    nickname = request.POST.get('nickname')
     if User.objects.filter(nickname=nickname).exists():
-        return JsonResponse({"nickname" : "impossible"})
-    return JsonResponse({"nickname": "possible"})
+        return JsonResponse({'err': 'nickname already exists!'})
+    else:
+        user = request.user
+        if user is None:
+            return JsonResponse({'err': 'invalid user'})
+        else:
+            user.nickname = nickname
+            return JsonResponse({'nickname': 'changed'})
+
 
 def email_duplicate_check(request):
     if request.method != "GET":
