@@ -30,7 +30,7 @@ urlpatterns = [
     path('google/callback/', views.google_callback, name='google_callback'),  
     path('google/login/finish/', GoogleLogin.as_view(), name='google_login_to_django'),
 
-    path('nickname/', NicknameChangeView.as_view(), name='nickname_change'),
+    path('nickname', NicknameChangeView.as_view(), name='nickname_change'),
     path('email/', views.email_duplicate_check, name='email_duplicate_check'),
 
     path('admin/', views.create_superuser, name='create_superuser'),
