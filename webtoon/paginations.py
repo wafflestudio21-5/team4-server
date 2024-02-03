@@ -37,7 +37,7 @@ class PaginationHandlerMixin(object):
 
 class WebtoonCursorPagination(CursorPagination):
     page_size = 9
-    ordering = '-id'
+    ordering = '-latestUploadDate'
 
 
 class EpisodeCursorPagination(CursorPagination):
