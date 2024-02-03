@@ -290,7 +290,7 @@ class GoogleLogin(SocialLoginView):
 class NicknameChangeView(APIView):
     def post(self, request):
         nickname = ""
-        nickname = request.data['nickname']
+        nickname += request.data['nickname']
         if User.objects.filter(nickname=nickname).exists():
             return Response(status=400)
         else:
