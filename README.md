@@ -118,4 +118,4 @@ This project is licensed under the terms of the MIT license. See LICENSE for mor
 This app is copy project of already existing app, [Naver Webtoon].
 
 [Naver Webtoon]: https://play.google.com/store/apps/details?id=com.nhn.android.webtoon&pcampaignid=web_share
-[다운로드]: https://drive.google.com/file/d/17QcQGb6mTG3qF9WCVzLULDwNLD-ki-id/view?usp=drive_link
+[다운로드]: https://drive.google.com/file/d/1Lr66-rEJei9eeUeahUYAUUBxhShJgVhI/view?usp=drive_link
