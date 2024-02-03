@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib.contenttypes.models import ContentType
 from django.http import Http404
 from django.db import IntegrityError
-from django.db.models import Subquery, OuterRef
+from django.db.models import OuterRef, Subquery, Case, When, DateTimeField, F, Exists
 
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -55,11 +55,15 @@ from .imageUploader import S3ImageUploader
 
 def annotateLatestUploadDate(queryset):
     """Webtoon queryset을 가장 최근 에피소드 업로드 순으로 정렬"""
+    subquery = Episode.objects.filter(
+        webtoon_id=OuterRef('pk')
+    ).order_by('-releasedDate').values('releasedDate')[:1]
+
     queryset = queryset.annotate(
-        latestUploadDate=Subquery(
-            Episode.objects.filter(
-                webtoon_id=OuterRef('pk')
-            ).order_by('-releasedDate').values('releasedDate')[0]
+        latestUploadDate=Case(
+            When(Exists(Episode.objects.filter(webtoon=OuterRef('pk'))), then=Subquery(subquery)),
+            default=F('releasedDate'),
+            output_field=DateTimeField()
         )
     )
 
@@ -182,8 +186,8 @@ class WebtoonListAPIView(APIView, PaginationHandlerMixin):
     def get_queryset(self):
         queryset = Webtoon.objects.all()
         # 최근 업로드 에피소드의 업로드 시간 기준 정렬
-        # return annotateLatestUploadDate(queryset)
-        return queryset
+        return annotateLatestUploadDate(queryset)
+        # return queryset
 
     def get_serializer_context(self):
         return {
@@ -235,8 +239,8 @@ class WebtoonListFinishedAPIView(generics.ListAPIView):
     def get_queryset(self):
         queryset = Webtoon.objects.filter(isFinished=True)
         # 최근 업로드 에피소드의 업로드 시간 기준 정렬
-        # return orderByLatestEpisode(queryset)
-        return queryset
+        return annotateLatestUploadDate(queryset)
+        # return queryset
 
 
 class WebtoonListRecentAPIView(generics.ListAPIView):
@@ -248,8 +252,8 @@ class WebtoonListRecentAPIView(generics.ListAPIView):
         from datetime import date, timedelta
         today = date.today()
         queryset = Webtoon.objects.filter(releasedDate__gte=today - timedelta(21))
-        # return orderByLatestEpisode(queryset)
-        return queryset
+        return annotateLatestUploadDate(queryset)
+        # return queryset
 
 
 class DayWebtoonListAPIView(generics.ListAPIView):
@@ -260,8 +264,8 @@ class DayWebtoonListAPIView(generics.ListAPIView):
     def get_queryset(self):
         day = get_object_or_404(DayOfWeek, name=self.kwargs.get('day'))
         queryset = Webtoon.objects.filter(uploadDays=day)
-        # return orderByLatestEpisode(queryset)
-        return queryset
+        return annotateLatestUploadDate(queryset)
+        # return queryset
 
 class EpisodeImageListAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -327,8 +331,8 @@ class TagWebtoonAPIView(generics.ListAPIView):
     def get_queryset(self):
         tag = self.getTag(self.kwargs.get('content'))
         queryset = Webtoon.objects.filter(tags=tag)
-        # return orderByLatestEpisode(queryset)
-        return queryset
+        return annotateLatestUploadDate(queryset)
+        # return queryset
 
 
 class EpisodeCommentAPIView(generics.ListCreateAPIView):
@@ -439,7 +443,12 @@ class EpisodeRatingAPIView(generics.RetrieveUpdateDestroyAPIView):
         
         #webtoon의 totalRating 계산
         webtoon = ratingOn.webtoon
-        episodes = Episode.objects.filter(webtoon=webtoon)
+
+        rating_exists = Exists(Rating.objects.filter(ratingOn_id=OuterRef('pk')))
+        episodes = Episode.objects.annotate(
+            rating_exists=rating_exists
+        ).filter(webtoon=webtoon).filter(rating_exists=True)
+
         totalRating = 0.0
         for episode in episodes:
             totalRating += float(episode.totalRating)
