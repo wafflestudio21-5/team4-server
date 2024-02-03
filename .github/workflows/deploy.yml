@@ -55,7 +55,7 @@ jobs:
           DJANGO_SUPERUSER_PASSWORD: ${{ secrets.DJANGO_SUPERUSER_PASSWORD }}
 
   build:
-    needs: ci
+#    needs: ci
     runs-on: ubuntu-latest
     environment: env
     steps:
