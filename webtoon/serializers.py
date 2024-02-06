@@ -116,6 +116,7 @@ class WebtoonContentSerializer(serializers.ModelSerializer):
 
         if uploadDayObjects == [] :
             webtoon.isFinished = True
+            webtoon.save()
         # if "titleImage" in validated_data:
         #     webtoon.titleImage = validated_data["titleImage"]
         

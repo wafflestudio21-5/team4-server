@@ -238,6 +238,7 @@ class WebtoonListFinishedAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         queryset = Webtoon.objects.filter(isFinished=True)
+        print(queryset)
         # 최근 업로드 에피소드의 업로드 시간 기준 정렬
         return annotateLatestUploadDate(queryset)
         # return queryset
