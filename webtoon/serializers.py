@@ -202,6 +202,12 @@ class EpisodeContentSerializer(serializers.ModelSerializer):
             'episodeNumber': {'validators': [MinValueValidator(1)]}
         }
 
+    def validate(self, data):
+        image_set = self.context['request'].FILES
+        for image_data in image_set.getlist('images'):
+            print(image_data)
+        return data
+
     def create(self, validated_data):
         instance = Episode.objects.create(**validated_data)
         image_set = self.context['request'].FILES
